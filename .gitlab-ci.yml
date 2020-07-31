@@ -8,8 +8,8 @@ before_script:
   - if [ "$ROS_DISTRO" == "indigo" ]; then echo "deb http://apt.roboception.de/ros $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-ros.list; fi
   - apt-get update -yq
   - if [ "$ROS_DISTRO" == "indigo" ]; then apt-get install -y --upgrade ros-${ROS_DISTRO}-rostime ros-${ROS_DISTRO}-roscpp; fi
-  - apt-get install -y lintian rc_genicam_api 
-  - rosdep install --from-paths . --ignore-src -r -y
+  - apt-get install -y lintian rc-genicam-api
+  - rosdep install --from-paths . --ignore-src -r -y --skip-keys="rc_genicam_api"
 
 variables:
   GET_SOURCES_ATTEMPTS: "3"
