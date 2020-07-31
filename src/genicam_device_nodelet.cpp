@@ -79,7 +79,7 @@ GenICamDeviceNodelet::GenICamDeviceNodelet()
 
 GenICamDeviceNodelet::~GenICamDeviceNodelet()
 {
-  ROS_INFO("rc_genicam_driver: Shutting down");
+  NODELET_INFO("Shutting down");
 
   // signal running threads and wait until they finish
 
@@ -94,7 +94,7 @@ GenICamDeviceNodelet::~GenICamDeviceNodelet()
 
 void GenICamDeviceNodelet::onInit()
 {
-  ROS_INFO("rc_genicam_driver: Initialization started");
+  NODELET_INFO("Initialization started");
 
   std::string ns = ros::this_node::getNamespace();
 
@@ -153,7 +153,7 @@ void GenICamDeviceNodelet::onInit()
   running = true;
   grab_thread = std::thread(&GenICamDeviceNodelet::grab, this, id, access_id);
 
-  ROS_INFO("rc_genicam_driver: Initialization done");
+  NODELET_INFO("Initialization done");
 }
 
 bool GenICamDeviceNodelet::depthAcquisitionTrigger(rc_common_msgs::Trigger::Request& req,
@@ -167,7 +167,7 @@ bool GenICamDeviceNodelet::depthAcquisitionTrigger(rc_common_msgs::Trigger::Requ
     {
       try
       {
-        ROS_DEBUG("rc_genicam_driver: Triggering stereo matching");
+        NODELET_DEBUG("Triggering stereo matching");
 
         rcg::callCommand(nodemap, "DepthAcquisitionTrigger", true);
 
@@ -178,7 +178,7 @@ bool GenICamDeviceNodelet::depthAcquisitionTrigger(rc_common_msgs::Trigger::Requ
       {
         res.return_code.value = rc_common_msgs::ReturnCodeConstants::INTERNAL_ERROR;
         res.return_code.message = ex.what();
-        ROS_ERROR_STREAM("rc_genicam_driver: " << ex.what());
+        NODELET_ERROR(ex.what());
       }
     }
     else
@@ -186,7 +186,7 @@ bool GenICamDeviceNodelet::depthAcquisitionTrigger(rc_common_msgs::Trigger::Requ
       res.return_code.value = rc_common_msgs::ReturnCodeConstants::NOT_APPLICABLE;
       res.return_code.message = "Triggering stereo matching is only possible if acquisition_mode is set to SingleFrame "
                                 "or SingleFrameOut1!";
-      ROS_DEBUG_STREAM("rc_genicam_driver: " << res.return_code.message);
+      NODELET_DEBUG_STREAM("" << res.return_code.message);
     }
   }
   else
@@ -669,7 +669,7 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
   }
   catch (const std::exception& ex)
   {
-    ROS_ERROR_STREAM("rc_genicam_driver: " << ex.what());
+    NODELET_ERROR(ex.what());
   }
 
   config = c;
@@ -895,7 +895,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
     gev_packet_size = 0;
     current_reconnect_trial = 1;
 
-    ROS_INFO_STREAM("rc_genicam_driver: Grabbing thread started for device '" << id << "'");
+    NODELET_INFO_STREAM("Grabbing thread started for device '" << id << "'");
 
     // loop until nodelet is killed
 
@@ -961,7 +961,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
           device_name = rcg::getString(nodemap, "DeviceUserID", true);
           device_ip = rcg::getString(nodemap, "GevCurrentIPAddress", true);
 
-          ROS_INFO_STREAM("rc_genicam_driver: "
+          NODELET_INFO_STREAM(""
                           << "Connecting to sensor '" << device_interface << ":" << device_serial << "' alias "
                           << dev->getDisplayName());
 
@@ -1044,7 +1044,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
         if (!color)
         {
-          ROS_INFO("rc_genicam_driver: Not a color camera. wb_auto, wb_ratio_red and wb_ratio_blue are without "
+          NODELET_INFO("Not a color camera. wb_auto, wb_ratio_red and wb_ratio_blue are without "
                    "function.");
         }
 
@@ -1119,7 +1119,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
         updater.force_update();
 
-        ROS_INFO_STREAM("rc_genicam_driver: Start streaming images");
+        NODELET_INFO_STREAM("Start streaming images");
 
         // grabbing and publishing
 
@@ -1275,7 +1275,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
         current_reconnect_trial++;
         pub.clear();
 
-        ROS_ERROR_STREAM("rc_genicam_driver: " << ex.what());
+        NODELET_ERROR(ex.what());
 
         updater.force_update();
 
@@ -1316,7 +1316,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
   updater.force_update();
 
   running = false;
-  ROS_INFO("rc_genicam_driver: Grabbing thread stopped");
+  NODELET_INFO("Grabbing thread stopped");
 }
 
 }  // namespace rc
