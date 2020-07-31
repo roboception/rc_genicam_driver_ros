@@ -1,0 +1,11 @@
+<library path="lib/librc_genicam_driver_nodelet">
+  <class name="rc_genicam_driver"
+         type="rc::GenICamDeviceNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description> 
+      Nodelet that connects to a Roboception rc_visard or rc_cube and provides ROS topics for
+      sensor data like rectified stereo images, but also for disparity,
+      confidence and error images.
+    </description>
+  </class>
+</library>
