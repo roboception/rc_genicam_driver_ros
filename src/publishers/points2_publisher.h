@@ -43,33 +43,29 @@
 
 namespace rc
 {
-
 class Points2Publisher : public GenICam2RosPublisher
 {
-  public:
+public:
+  Points2Publisher(ros::NodeHandle& nh, const std::string& frame_id, std::function<void()>& sub_changed);
 
-    Points2Publisher(ros::NodeHandle& nh, const std::string& frame_id,
-                     std::function<void()> &sub_changed);
+  bool used() override;
+  void requiresComponents(int& components, bool& color) override;
 
-    bool used() override;
-    void requiresComponents(int &components, bool &color) override;
+  void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
 
-    void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
+private:
+  Points2Publisher(const Points2Publisher&);             // forbidden
+  Points2Publisher& operator=(const Points2Publisher&);  // forbidden
 
-  private:
+  rcg::ImageList left_list;
+  rcg::ImageList disp_list;
 
-    Points2Publisher(const Points2Publisher&);             // forbidden
-    Points2Publisher& operator=(const Points2Publisher&);  // forbidden
+  float f, t;
+  float invalid;
+  float scale;
 
-    rcg::ImageList left_list;
-    rcg::ImageList disp_list;
-
-    float f, t;
-    float invalid;
-    float scale;
-
-    ros::Publisher pub;
-  };
-}
+  ros::Publisher pub;
+};
+}  // namespace rc
 
 #endif

@@ -39,14 +39,13 @@
 
 namespace rc
 {
-
 ConfidencePublisher::ConfidencePublisher(ros::NodeHandle& nh, const std::string& frame_id,
-  std::function<void()> &sub_changed) : GenICam2RosPublisher(frame_id)
+                                         std::function<void()>& sub_changed)
+  : GenICam2RosPublisher(frame_id)
 {
-  sub_callback=sub_changed;
-  pub = nh.advertise<sensor_msgs::Image>("confidence", 1,
-    boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
-    boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
+  sub_callback = sub_changed;
+  pub = nh.advertise<sensor_msgs::Image>("confidence", 1, boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
+                                         boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
 }
 
 bool ConfidencePublisher::used()
@@ -54,11 +53,11 @@ bool ConfidencePublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void ConfidencePublisher::requiresComponents(int &components, bool &color)
+void ConfidencePublisher::requiresComponents(int& components, bool& color)
 {
   if (pub.getNumSubscribers() > 0)
   {
-    components|=ComponentConfidence;
+    components |= ComponentConfidence;
   }
 }
 
@@ -114,4 +113,4 @@ void ConfidencePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint
   }
 }
 
-}
+}  // namespace rc

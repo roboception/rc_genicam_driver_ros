@@ -43,34 +43,30 @@
 
 namespace rc
 {
-
 class ErrorDepthPublisher : public GenICam2RosPublisher
 {
-  public:
+public:
+  ErrorDepthPublisher(ros::NodeHandle& nh, const std::string& frame_id, std::function<void()>& sub_changed);
 
-    ErrorDepthPublisher(ros::NodeHandle& nh, const std::string& frame_id,
-                        std::function<void()> &sub_changed);
+  bool used() override;
+  void requiresComponents(int& components, bool& color) override;
 
-    bool used() override;
-    void requiresComponents(int &components, bool &color) override;
+  void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
 
-    void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
+private:
+  ErrorDepthPublisher(const ErrorDepthPublisher&);             // forbidden
+  ErrorDepthPublisher& operator=(const ErrorDepthPublisher&);  // forbidden
 
-  private:
+  rcg::ImageList disp_list;
+  rcg::ImageList err_list;
 
-    ErrorDepthPublisher(const ErrorDepthPublisher&);             // forbidden
-    ErrorDepthPublisher& operator=(const ErrorDepthPublisher&);  // forbidden
+  float f, t;
+  float invalid;
+  float scale;
 
-    rcg::ImageList disp_list;
-    rcg::ImageList err_list;
-
-    float f, t;
-    float invalid;
-    float scale;
-
-    ros::Publisher pub;
+  ros::Publisher pub;
 };
 
-}
+}  // namespace rc
 
 #endif

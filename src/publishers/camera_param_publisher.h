@@ -41,27 +41,23 @@
 
 namespace rc
 {
-
 class CameraParamPublisher : public GenICam2RosPublisher
 {
-  public:
+public:
+  CameraParamPublisher(ros::NodeHandle& nh, const std::string& frame_id, bool left, std::function<void()>& sub_changed);
 
-    CameraParamPublisher(ros::NodeHandle& nh, const std::string& frame_id, bool left,
-                         std::function<void()> &sub_changed);
+  bool used() override;
+  void requiresComponents(int& components, bool& color) override;
 
-    bool used() override;
-    void requiresComponents(int &components, bool &color) override;
+  void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
 
-    void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
+private:
+  CameraParamPublisher(const CameraParamPublisher&);             // forbidden
+  CameraParamPublisher& operator=(const CameraParamPublisher&);  // forbidden
 
-  private:
-
-    CameraParamPublisher(const CameraParamPublisher&);             // forbidden
-    CameraParamPublisher& operator=(const CameraParamPublisher&);  // forbidden
-
-    ros::Publisher pub;
+  ros::Publisher pub;
 };
 
-}
+}  // namespace rc
 
 #endif

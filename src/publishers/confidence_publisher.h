@@ -41,27 +41,23 @@
 
 namespace rc
 {
-
 class ConfidencePublisher : public GenICam2RosPublisher
 {
-  public:
+public:
+  ConfidencePublisher(ros::NodeHandle& nh, const std::string& frame_id, std::function<void()>& sub_changed);
 
-    ConfidencePublisher(ros::NodeHandle& nh, const std::string& frame_id,
-                        std::function<void()> &sub_changed);
+  bool used() override;
+  void requiresComponents(int& components, bool& color) override;
 
-    bool used() override;
-    void requiresComponents(int &components, bool &color) override;
+  void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
 
-    void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
+private:
+  ConfidencePublisher(const ConfidencePublisher&);             // forbidden
+  ConfidencePublisher& operator=(const ConfidencePublisher&);  // forbidden
 
-  private:
-
-    ConfidencePublisher(const ConfidencePublisher&);             // forbidden
-    ConfidencePublisher& operator=(const ConfidencePublisher&);  // forbidden
-
-    ros::Publisher pub;
+  ros::Publisher pub;
 };
 
-}
+}  // namespace rc
 
 #endif

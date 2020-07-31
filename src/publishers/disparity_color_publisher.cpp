@@ -40,15 +40,13 @@
 
 namespace rc
 {
-
-DisparityColorPublisher::DisparityColorPublisher(image_transport::ImageTransport& it,
-  const std::string& frame_id, std::function<void()> &sub_changed)
+DisparityColorPublisher::DisparityColorPublisher(image_transport::ImageTransport& it, const std::string& frame_id,
+                                                 std::function<void()>& sub_changed)
   : GenICam2RosPublisher(frame_id)
 {
-  sub_callback=sub_changed;
-  pub = it.advertise("disparity_color", 1,
-    boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1),
-    boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1));
+  sub_callback = sub_changed;
+  pub = it.advertise("disparity_color", 1, boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1),
+                     boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1));
 }
 
 bool DisparityColorPublisher::used()
@@ -56,15 +54,15 @@ bool DisparityColorPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void DisparityColorPublisher::requiresComponents(int &components, bool &color)
+void DisparityColorPublisher::requiresComponents(int& components, bool& color)
 {
   if (pub.getNumSubscribers() > 0)
   {
-    components|=ComponentDisparity;
+    components |= ComponentDisparity;
   }
 }
 
-void DisparityColorPublisher::publish(const rcg::Buffer *buffer, uint32_t part, uint64_t pixelformat)
+void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat)
 {
   if (nodemap && pub.getNumSubscribers() > 0 && pixelformat == Coord3D_C16)
   {
@@ -88,7 +86,7 @@ void DisparityColorPublisher::publish(const rcg::Buffer *buffer, uint32_t part, 
     // get pointer to image data in buffer
 
     size_t px = buffer->getXPadding(part);
-    const uint8_t *ps = static_cast<const uint8_t*>(buffer->getBase(part));
+    const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase(part));
 
     // ensure that current disprange setting is sufficient
 
@@ -97,23 +95,23 @@ void DisparityColorPublisher::publish(const rcg::Buffer *buffer, uint32_t part, 
     rcg::setEnum(nodemap, "ComponentSelector", "Disparity", true);
     rcg::setEnum(nodemap, "ChunkComponentSelector", "Disparity", true);
 
-    int drange=rcg::getInteger(nodemap, "DepthDispRange", 0, 0, true);
-    std::string quality=rcg::getString(nodemap, "DepthQuality", true);
+    int drange = rcg::getInteger(nodemap, "DepthDispRange", 0, 0, true);
+    std::string quality = rcg::getString(nodemap, "DepthQuality", true);
 
     if (quality == "Full")
     {
-      drange*=2;
+      drange *= 2;
     }
     else if (quality == "Medium")
     {
-      drange/=2;
+      drange /= 2;
     }
     else if (quality == "Low")
     {
-      drange/=3;
+      drange /= 3;
     }
 
-    float scale=rcg::getFloat(nodemap, "ChunkScan3dCoordinateScale", 0, 0, true);
+    float scale = rcg::getFloat(nodemap, "ChunkScan3dCoordinateScale", 0, 0, true);
 
     // convert image data
 
@@ -121,7 +119,7 @@ void DisparityColorPublisher::publish(const rcg::Buffer *buffer, uint32_t part, 
     im->step = 3 * im->width * sizeof(uint8_t);
 
     im->data.resize(im->step * im->height);
-    uint8_t *pt = reinterpret_cast<uint8_t*>(&im->data[0]);
+    uint8_t* pt = reinterpret_cast<uint8_t*>(&im->data[0]);
 
     for (uint32_t k = 0; k < im->height; k++)
     {
@@ -170,4 +168,4 @@ void DisparityColorPublisher::publish(const rcg::Buffer *buffer, uint32_t part, 
   }
 }
 
-}
+}  // namespace rc

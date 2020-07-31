@@ -40,15 +40,13 @@
 
 namespace rc
 {
-
-ErrorDisparityPublisher::ErrorDisparityPublisher(ros::NodeHandle& nh,
-  const std::string& frame_id, std::function<void()> &sub_changed) :
-  GenICam2RosPublisher(frame_id)
+ErrorDisparityPublisher::ErrorDisparityPublisher(ros::NodeHandle& nh, const std::string& frame_id,
+                                                 std::function<void()>& sub_changed)
+  : GenICam2RosPublisher(frame_id)
 {
-  sub_callback=sub_changed;
-  pub = nh.advertise<sensor_msgs::Image>("error_disparity", 1,
-    boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
-    boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
+  sub_callback = sub_changed;
+  pub = nh.advertise<sensor_msgs::Image>("error_disparity", 1, boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
+                                         boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
 }
 
 bool ErrorDisparityPublisher::used()
@@ -56,11 +54,11 @@ bool ErrorDisparityPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void ErrorDisparityPublisher::requiresComponents(int &components, bool &color)
+void ErrorDisparityPublisher::requiresComponents(int& components, bool& color)
 {
   if (pub.getNumSubscribers() > 0)
   {
-    components|=ComponentError;
+    components |= ComponentError;
   }
 }
 
@@ -117,4 +115,4 @@ void ErrorDisparityPublisher::publish(const rcg::Buffer* buffer, uint32_t part, 
   }
 }
 
-}
+}  // namespace rc

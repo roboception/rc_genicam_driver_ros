@@ -41,9 +41,8 @@
 
 namespace rc
 {
-
 ImagePublisher::ImagePublisher(image_transport::ImageTransport& it, const std::string& frame_id, bool _left,
-  bool _color, bool out1_filter, std::function<void()> &sub_changed)
+                               bool _color, bool out1_filter, std::function<void()>& sub_changed)
   : GenICam2RosPublisher(frame_id)
 {
   left = _left;
@@ -65,45 +64,41 @@ ImagePublisher::ImagePublisher(image_transport::ImageTransport& it, const std::s
     name = name + "_color";
   }
 
-  sub_callback=sub_changed;
+  sub_callback = sub_changed;
 
-  pub = it.advertise(name, 1,
-    boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1),
-    boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1));
+  pub = it.advertise(name, 1, boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1),
+                     boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1));
 
   if (out1_filter)
   {
-    pub_out1_low = it.advertise(name + "_out1_low", 1,
-      boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1),
-      boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1));
+    pub_out1_low = it.advertise(name + "_out1_low", 1, boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1),
+                                boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1));
 
-    pub_out1_high = it.advertise(name + "_out1_high", 1,
-      boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1),
-      boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1));
+    pub_out1_high = it.advertise(name + "_out1_high", 1, boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1),
+                                 boost::bind(&GenICam2RosPublisher::subChangedIt, this, _1));
   }
 }
 
 bool ImagePublisher::used()
 {
-  return pub.getNumSubscribers() > 0 || pub_out1_low.getNumSubscribers() > 0 ||
-         pub_out1_high.getNumSubscribers() > 0;
+  return pub.getNumSubscribers() > 0 || pub_out1_low.getNumSubscribers() > 0 || pub_out1_high.getNumSubscribers() > 0;
 }
 
-void ImagePublisher::requiresComponents(int &components, bool &_color)
+void ImagePublisher::requiresComponents(int& components, bool& _color)
 {
-  if (pub.getNumSubscribers() > 0 || pub_out1_low.getNumSubscribers() > 0 ||
-      pub_out1_high.getNumSubscribers() > 0)
+  if (pub.getNumSubscribers() > 0 || pub_out1_low.getNumSubscribers() > 0 || pub_out1_high.getNumSubscribers() > 0)
   {
     if (left)
     {
-      components|=ComponentIntensity;
+      components |= ComponentIntensity;
     }
     else
     {
-      components|=ComponentIntensityCombined;
+      components |= ComponentIntensityCombined;
     }
 
-    if (color) _color=true;
+    if (color)
+      _color = true;
   }
 }
 
@@ -112,9 +107,9 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t 
   if (nodemap)
   {
     rcg::setEnum(nodemap, "ChunkLineSelector", "Out1", true);
-    std::string out1_mode=rcg::getEnum(nodemap, "ChunkLineSource", true);
-    bool out1_only_low=out1_mode == "Low" || out1_mode == "ExposureAlternateActive";
-    bool out1=rcg::getInteger(nodemap, "ChunkLineStatusAll", 0, 0, true)&0x1;
+    std::string out1_mode = rcg::getEnum(nodemap, "ChunkLineSource", true);
+    bool out1_only_low = out1_mode == "Low" || out1_mode == "ExposureAlternateActive";
+    bool out1 = rcg::getInteger(nodemap, "ChunkLineStatusAll", 0, 0, true) & 0x1;
 
     bool sub = (pub.getNumSubscribers() > 0 && (!out1_only_low || !out1));
 
@@ -252,4 +247,4 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t 
   }
 }
 
-}
+}  // namespace rc

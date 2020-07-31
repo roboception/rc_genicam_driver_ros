@@ -52,71 +52,67 @@
 
 namespace rc
 {
-
 class GenICamDeviceNodelet : public nodelet::Nodelet
 {
-  public:
+public:
+  GenICamDeviceNodelet();
+  virtual ~GenICamDeviceNodelet();
 
-    GenICamDeviceNodelet();
-    virtual ~GenICamDeviceNodelet();
+  virtual void onInit();
 
-    virtual void onInit();
+  bool depthAcquisitionTrigger(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
 
-    bool depthAcquisitionTrigger(rc_common_msgs::Trigger::Request& req,
-                                 rc_common_msgs::Trigger::Response& resp);
+private:
+  void initConfiguration();
 
-  private:
+  void reconfigure(rc_genicam_driver::rc_genicam_driverConfig& c, uint32_t level);
 
-    void initConfiguration();
+  void updateSubscriptions(bool force = false);
 
-    void reconfigure(rc_genicam_driver::rc_genicam_driverConfig &c, uint32_t level);
+  void subChanged();
 
-    void updateSubscriptions(bool force=false);
+  void publishConnectionDiagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat);
+  void publishDeviceDiagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat);
 
-    void subChanged();
+  void grab(std::string id, rcg::Device::ACCESS access);
 
-    void publishConnectionDiagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat);
-    void publishDeviceDiagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat);
+  std::string frame_id;
+  ros::ServiceServer trigger_service;
 
-    void grab(std::string id, rcg::Device::ACCESS access);
+  boost::recursive_mutex reconfig_mtx;
+  dynamic_reconfigure::Server<rc_genicam_driver::rc_genicam_driverConfig>* reconfig;
+  rc_genicam_driver::rc_genicam_driverConfig config;
 
-    std::string frame_id;
-    ros::ServiceServer trigger_service;
+  std::recursive_mutex device_mtx;
+  std::shared_ptr<rcg::Device> dev;
+  std::shared_ptr<GenApi::CNodeMapRef> nodemap;
 
-    boost::recursive_mutex reconfig_mtx;
-    dynamic_reconfigure::Server<rc_genicam_driver::rc_genicam_driverConfig> *reconfig;
-    rc_genicam_driver::rc_genicam_driverConfig config;
+  int scomponents;
+  bool scolor;
 
-    std::recursive_mutex device_mtx;
-    std::shared_ptr<rcg::Device> dev;
-    std::shared_ptr<GenApi::CNodeMapRef> nodemap;
+  std::thread grab_thread;
+  std::atomic_bool running;
 
-    int scomponents;
-    bool scolor;
+  std::vector<std::shared_ptr<GenICam2RosPublisher> > pub;
 
-    std::thread grab_thread;
-    std::atomic_bool running;
+  std::string device_model;
+  std::string device_version;
+  std::string device_serial;
+  std::string device_mac;
+  std::string device_name;
+  std::string device_interface;
+  std::string device_ip;
+  int gev_packet_size;
+  int connection_loss_total;
+  int complete_buffers_total;
+  int incomplete_buffers_total;
+  int image_receive_timeouts_total;
+  int current_reconnect_trial;
+  bool streaming;
 
-    std::vector<std::shared_ptr<GenICam2RosPublisher> > pub;
-
-    std::string device_model;
-    std::string device_version;
-    std::string device_serial;
-    std::string device_mac;
-    std::string device_name;
-    std::string device_interface;
-    std::string device_ip;
-    int gev_packet_size;
-    int connection_loss_total;
-    int complete_buffers_total;
-    int incomplete_buffers_total;
-    int image_receive_timeouts_total;
-    int current_reconnect_trial;
-    bool streaming;
-
-    diagnostic_updater::Updater updater;
+  diagnostic_updater::Updater updater;
 };
 
-}
+}  // namespace rc
 
 #endif

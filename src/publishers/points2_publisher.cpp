@@ -40,19 +40,17 @@
 
 namespace rc
 {
-
-Points2Publisher::Points2Publisher(ros::NodeHandle& nh, const std::string& frame_id,
-  std::function<void()> &sub_changed) : GenICam2RosPublisher(frame_id), left_list(75)
+Points2Publisher::Points2Publisher(ros::NodeHandle& nh, const std::string& frame_id, std::function<void()>& sub_changed)
+  : GenICam2RosPublisher(frame_id), left_list(75)
 {
-  f=0;
-  t=0;
-  invalid=-1;
-  scale=1;
+  f = 0;
+  t = 0;
+  invalid = -1;
+  scale = 1;
 
-  sub_callback=sub_changed;
-  pub = nh.advertise<sensor_msgs::PointCloud2>("points2", 1,
-    boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
-    boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
+  sub_callback = sub_changed;
+  pub = nh.advertise<sensor_msgs::PointCloud2>("points2", 1, boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
+                                               boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
 }
 
 bool Points2Publisher::used()
@@ -60,11 +58,11 @@ bool Points2Publisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void Points2Publisher::requiresComponents(int &components, bool &color)
+void Points2Publisher::requiresComponents(int& components, bool& color)
 {
   if (pub.getNumSubscribers() > 0)
   {
-    components|=ComponentIntensity|ComponentDisparity;
+    components |= ComponentIntensity | ComponentDisparity;
   }
 }
 
@@ -75,7 +73,7 @@ void Points2Publisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_
     if (pub.getNumSubscribers() > 0)
     {
       rcg::setEnum(nodemap, "ChunkLineSelector", "Out1", true);
-      std::string out1_mode=rcg::getEnum(nodemap, "ChunkLineSource", true);
+      std::string out1_mode = rcg::getEnum(nodemap, "ChunkLineSource", true);
       uint64_t tolerance_ns;
 
       if (out1_mode == "ExposureAlternateActive")
@@ -87,7 +85,7 @@ void Points2Publisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_
         tolerance_ns = 0;
       }
 
-      bool out1=rcg::getInteger(nodemap, "ChunkLineStatusAll", 0, 0, true)&0x1;
+      bool out1 = rcg::getInteger(nodemap, "ChunkLineStatusAll", 0, 0, true) & 0x1;
 
       // buffer left and disparity images
 
@@ -108,13 +106,13 @@ void Points2Publisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_
         disp_list.add(buffer, part);
 
         rcg::setEnum(nodemap, "ChunkComponentSelector", "Disparity", true);
-        f=rcg::getFloat(nodemap, "ChunkScan3dFocalLength", 0, 0, true);
-        t=rcg::getFloat(nodemap, "ChunkScan3dBaseline", 0, 0, true);
+        f = rcg::getFloat(nodemap, "ChunkScan3dFocalLength", 0, 0, true);
+        t = rcg::getFloat(nodemap, "ChunkScan3dBaseline", 0, 0, true);
 
-        invalid=-1;
+        invalid = -1;
         if (rcg::getBoolean(nodemap, "ChunkScan3dInvalidDataFlag", false))
         {
-          invalid=rcg::getFloat(nodemap, "ChunkScan3dInvalidDataValue", 0, 0, true);
+          invalid = rcg::getFloat(nodemap, "ChunkScan3dInvalidDataValue", 0, 0, true);
         }
 
         scale = rcg::getFloat(nodemap, "ChunkScan3dCoordinateScale", 0, 0, true);
@@ -277,4 +275,4 @@ void Points2Publisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_
   }
 }
 
-}
+}  // namespace rc

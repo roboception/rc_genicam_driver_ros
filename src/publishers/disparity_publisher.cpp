@@ -40,14 +40,14 @@
 
 namespace rc
 {
-
 DisparityPublisher::DisparityPublisher(ros::NodeHandle& nh, const std::string& frame_id,
-  std::function<void()> &sub_changed) : GenICam2RosPublisher(frame_id)
+                                       std::function<void()>& sub_changed)
+  : GenICam2RosPublisher(frame_id)
 {
-  sub_callback=sub_changed;
+  sub_callback = sub_changed;
   pub = nh.advertise<stereo_msgs::DisparityImage>("disparity", 1,
-    boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
-    boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
+                                                  boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
+                                                  boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
 }
 
 bool DisparityPublisher::used()
@@ -55,11 +55,11 @@ bool DisparityPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void DisparityPublisher::requiresComponents(int &components, bool &color)
+void DisparityPublisher::requiresComponents(int& components, bool& color)
 {
   if (pub.getNumSubscribers() > 0)
   {
-    components|=ComponentDisparity;
+    components |= ComponentDisparity;
   }
 }
 
@@ -81,23 +81,23 @@ void DisparityPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint6
     // get some information from the buffer
 
     rcg::setEnum(nodemap, "ChunkComponentSelector", "Disparity", true);
-    double f=rcg::getFloat(nodemap, "ChunkScan3dFocalLength", 0, 0, true);
-    double t=rcg::getFloat(nodemap, "ChunkScan3dBaseline", 0, 0, true);
+    double f = rcg::getFloat(nodemap, "ChunkScan3dFocalLength", 0, 0, true);
+    double t = rcg::getFloat(nodemap, "ChunkScan3dBaseline", 0, 0, true);
     float scale = rcg::getFloat(nodemap, "ChunkScan3dCoordinateScale", 0, 0, true);
     int disprange = rcg::getInteger(nodemap, "DepthDispRange", 0, 0, true);
-    std::string quality=rcg::getString(nodemap, "DepthQuality", true);
+    std::string quality = rcg::getString(nodemap, "DepthQuality", true);
 
     if (quality == "Full")
     {
-      disprange*=2;
+      disprange *= 2;
     }
     else if (quality == "Medium")
     {
-      disprange/=2;
+      disprange /= 2;
     }
     else if (quality == "Low")
     {
-      disprange/=3;
+      disprange /= 3;
     }
 
     // prepare size and format of outgoing image
@@ -178,4 +178,4 @@ void DisparityPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint6
     pub.publish(p);
   }
 }
-}
+}  // namespace rc

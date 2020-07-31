@@ -61,21 +61,20 @@
 
 namespace rc
 {
-
 GenICamDeviceNodelet::GenICamDeviceNodelet()
 {
-  scomponents=0;
-  scolor=0;
+  scomponents = 0;
+  scolor = 0;
 
-  running=false;
+  running = false;
 
-  gev_packet_size=0;
-  connection_loss_total=0;
-  complete_buffers_total=0;
-  incomplete_buffers_total=0;
-  image_receive_timeouts_total=0;
-  current_reconnect_trial=0;
-  streaming=false;
+  gev_packet_size = 0;
+  connection_loss_total = 0;
+  complete_buffers_total = 0;
+  incomplete_buffers_total = 0;
+  image_receive_timeouts_total = 0;
+  current_reconnect_trial = 0;
+  streaming = false;
 }
 
 GenICamDeviceNodelet::~GenICamDeviceNodelet()
@@ -84,7 +83,7 @@ GenICamDeviceNodelet::~GenICamDeviceNodelet()
 
   // signal running threads and wait until they finish
 
-  running=false;
+  running = false;
   if (grab_thread.joinable())
   {
     grab_thread.join();
@@ -97,20 +96,20 @@ void GenICamDeviceNodelet::onInit()
 {
   ROS_INFO("rc_genicam_driver: Initialization started");
 
-  std::string ns=ros::this_node::getNamespace();
+  std::string ns = ros::this_node::getNamespace();
 
   if (ns.size() > 0 && ns[0] == '/')
   {
-    ns=ns.substr(1);
+    ns = ns.substr(1);
   }
 
   if (ns.size() > 0)
   {
-    frame_id=ns+"_camera";
+    frame_id = ns + "_camera";
   }
   else
   {
-    frame_id="camera";
+    frame_id = "camera";
   }
 
   // get parameter configuration
@@ -118,8 +117,8 @@ void GenICamDeviceNodelet::onInit()
   ros::NodeHandle pnh(getPrivateNodeHandle());
   ros::NodeHandle nh(getNodeHandle(), "");
 
-  std::string id="*";
-  std::string access="control";
+  std::string id = "*";
+  std::string access = "control";
 
   pnh.param("device", id, id);
   pnh.param("gev_access", access, access);
@@ -135,15 +134,14 @@ void GenICamDeviceNodelet::onInit()
   }
   else
   {
-    ROS_FATAL_STREAM("rc_genicam_driver: Access must be 'control' or 'exclusive': "
-                     << access);
+    ROS_FATAL_STREAM("rc_genicam_driver: Access must be 'control' or 'exclusive': " << access);
     return;
   }
 
   // setup services
 
-  trigger_service=pnh.advertiseService("depth_acquisition_trigger",
-    &GenICamDeviceNodelet::depthAcquisitionTrigger, this);
+  trigger_service =
+      pnh.advertiseService("depth_acquisition_trigger", &GenICamDeviceNodelet::depthAcquisitionTrigger, this);
 
   // add callbacks for diagnostics publishing
 
@@ -152,14 +150,14 @@ void GenICamDeviceNodelet::onInit()
 
   // start grabbing thread
 
-  running=true;
-  grab_thread=std::thread(&GenICamDeviceNodelet::grab, this, id, access_id);
+  running = true;
+  grab_thread = std::thread(&GenICamDeviceNodelet::grab, this, id, access_id);
 
   ROS_INFO("rc_genicam_driver: Initialization done");
 }
 
-bool GenICamDeviceNodelet::depthAcquisitionTrigger(rc_common_msgs::Trigger::Request &req,
-                                                   rc_common_msgs::Trigger::Response &res)
+bool GenICamDeviceNodelet::depthAcquisitionTrigger(rc_common_msgs::Trigger::Request& req,
+                                                   rc_common_msgs::Trigger::Response& res)
 {
   std::lock_guard<std::recursive_mutex> lock(device_mtx);
 
@@ -173,27 +171,28 @@ bool GenICamDeviceNodelet::depthAcquisitionTrigger(rc_common_msgs::Trigger::Requ
 
         rcg::callCommand(nodemap, "DepthAcquisitionTrigger", true);
 
-        res.return_code.value=rc_common_msgs::ReturnCodeConstants::SUCCESS;
-        res.return_code.message="Stereo matching was triggered.";
+        res.return_code.value = rc_common_msgs::ReturnCodeConstants::SUCCESS;
+        res.return_code.message = "Stereo matching was triggered.";
       }
-      catch (const std::exception &ex)
+      catch (const std::exception& ex)
       {
-        res.return_code.value=rc_common_msgs::ReturnCodeConstants::INTERNAL_ERROR;
-        res.return_code.message=ex.what();
+        res.return_code.value = rc_common_msgs::ReturnCodeConstants::INTERNAL_ERROR;
+        res.return_code.message = ex.what();
         ROS_ERROR_STREAM("rc_genicam_driver: " << ex.what());
       }
     }
     else
     {
-      res.return_code.value=rc_common_msgs::ReturnCodeConstants::NOT_APPLICABLE;
-      res.return_code.message="Triggering stereo matching is only possible if acquisition_mode is set to SingleFrame or SingleFrameOut1!";
+      res.return_code.value = rc_common_msgs::ReturnCodeConstants::NOT_APPLICABLE;
+      res.return_code.message = "Triggering stereo matching is only possible if acquisition_mode is set to SingleFrame "
+                                "or SingleFrameOut1!";
       ROS_DEBUG_STREAM("rc_genicam_driver: " << res.return_code.message);
     }
   }
   else
   {
-    res.return_code.value=rc_common_msgs::ReturnCodeConstants::NOT_APPLICABLE;
-    res.return_code.message="Not connected";
+    res.return_code.value = rc_common_msgs::ReturnCodeConstants::NOT_APPLICABLE;
+    res.return_code.message = "Not connected";
   }
 
   return true;
@@ -231,7 +230,7 @@ void GenICamDeviceNodelet::initConfiguration()
     config.camera_exp_auto_average_max = rcg::getFloat(nodemap, "RcExposureAutoAverageMax", 0, 0, true);
     config.camera_exp_auto_average_min = rcg::getFloat(nodemap, "RcExposureAutoAverageMin", 0, 0, true);
   }
-  catch (const std::exception &)
+  catch (const std::exception&)
   {
     config.camera_exp_auto_average_max = 0.75f;
     config.camera_exp_auto_average_min = 0.25f;
@@ -256,7 +255,7 @@ void GenICamDeviceNodelet::initConfiguration()
     rcg::setEnum(nodemap, "BalanceRatioSelector", "Blue", true);
     config.camera_wb_ratio_blue = rcg::getFloat(nodemap, "BalanceRatio", 0, 0, true);
   }
-  catch (const std::exception &)
+  catch (const std::exception&)
   {
     config.camera_wb_auto = true;
     config.camera_wb_ratio_red = 1.2;
@@ -351,8 +350,7 @@ void GenICamDeviceNodelet::initConfiguration()
   pnh.setParam("out2_mode", config.out2_mode);
 }
 
-void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfig &c,
-                                       uint32_t level)
+void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfig& c, uint32_t level)
 {
   std::lock_guard<std::recursive_mutex> lock(device_mtx);
 
@@ -360,12 +358,12 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
   {
     if (nodemap)
     {
-      if (level&1)
+      if (level & 1)
       {
         rcg::setFloat(nodemap, "AcquisitionFrameRate", c.camera_fps, true);
       }
 
-      if (level&2)
+      if (level & 2)
       {
         if (c.camera_exp_auto)
         {
@@ -373,7 +371,7 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
 
           if (c.camera_exp_auto_mode == "Off" || c.camera_exp_auto_mode == "Normal")
           {
-            c.camera_exp_auto_mode="Continuous";
+            c.camera_exp_auto_mode = "Continuous";
           }
 
           // find user requested auto exposure mode in the list of enums
@@ -381,12 +379,12 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
           std::vector<std::string> list;
           rcg::getEnum(nodemap, "ExposureAuto", list, false);
 
-          std::string mode="Continuous";
-          for (size_t i=0; i<list.size(); i++)
+          std::string mode = "Continuous";
+          for (size_t i = 0; i < list.size(); i++)
           {
             if (c.camera_exp_auto_mode == list[i])
             {
-              mode=list[i];
+              mode = list[i];
             }
           }
 
@@ -398,287 +396,283 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
 
           if (mode == "Continuous")
           {
-            mode="Normal";
+            mode = "Normal";
           }
 
-          c.camera_exp_auto_mode=mode;
+          c.camera_exp_auto_mode = mode;
         }
         else
         {
           rcg::setEnum(nodemap, "ExposureAuto", "Off", true);
 
-          usleep(100*1000);
+          usleep(100 * 1000);
 
-          c.camera_exp_value=rcg::getFloat(nodemap, "ExposureTime", 0, 0, true, true)/1000000;
-          c.camera_gain_value=rcg::getFloat(nodemap, "Gain", 0, 0, true, true);
+          c.camera_exp_value = rcg::getFloat(nodemap, "ExposureTime", 0, 0, true, true) / 1000000;
+          c.camera_gain_value = rcg::getFloat(nodemap, "Gain", 0, 0, true, true);
         }
       }
 
-      if (level&4)
+      if (level & 4)
       {
-        rcg::setFloat(nodemap, "ExposureTimeAutoMax", 1000000*c.camera_exp_max, true);
+        rcg::setFloat(nodemap, "ExposureTimeAutoMax", 1000000 * c.camera_exp_max, true);
       }
 
-      if (level&8)
+      if (level & 8)
       {
         if (!rcg::setFloat(nodemap, "RcExposureAutoAverageMax", c.camera_exp_auto_average_max, false))
         {
           ROS_WARN("rc_genicam_driver: rc_visard does not support parameter 'exp_auto_average_max'");
-          c.camera_exp_auto_average_max=0.75f;
+          c.camera_exp_auto_average_max = 0.75f;
         }
       }
 
-      if (level&16)
+      if (level & 16)
       {
         if (!rcg::setFloat(nodemap, "RcExposureAutoAverageMin", c.camera_exp_auto_average_min, false))
         {
           ROS_WARN("rc_genicam_driver: rc_visard does not support parameter 'exp_auto_average_min'");
-          c.camera_exp_auto_average_min=0.25f;
+          c.camera_exp_auto_average_min = 0.25f;
         }
       }
 
-      if (level&32)
+      if (level & 32)
       {
-        rcg::setFloat(nodemap, "ExposureTime", 1000000*c.camera_exp_value, true);
+        rcg::setFloat(nodemap, "ExposureTime", 1000000 * c.camera_exp_value, true);
       }
 
       c.camera_gain_value = round(c.camera_gain_value / 6) * 6;
 
-      if (level&64)
+      if (level & 64)
       {
         rcg::setFloat(nodemap, "Gain", c.camera_gain_value, true);
       }
 
-      if (level&128)
+      if (level & 128)
       {
         rcg::setInteger(nodemap, "ExposureRegionOffsetX", c.camera_exp_offset_x, true);
       }
 
-      if (level&256)
+      if (level & 256)
       {
         rcg::setInteger(nodemap, "ExposureRegionOffsetY", c.camera_exp_offset_y, true);
       }
 
-      if (level&512)
+      if (level & 512)
       {
         rcg::setInteger(nodemap, "ExposureRegionWidth", c.camera_exp_width, true);
       }
 
-      if (level&1024)
+      if (level & 1024)
       {
         rcg::setInteger(nodemap, "ExposureRegionHeight", c.camera_exp_height, true);
       }
 
-      bool color_ok=true;
+      bool color_ok = true;
 
-      if (level&2048)
+      if (level & 2048)
       {
         if (c.camera_wb_auto)
         {
-          color_ok=rcg::setEnum(nodemap, "BalanceWhiteAuto", "Continuous", false);
+          color_ok = rcg::setEnum(nodemap, "BalanceWhiteAuto", "Continuous", false);
         }
         else
         {
-          color_ok=rcg::setEnum(nodemap, "BalanceWhiteAuto", "Off", false);
+          color_ok = rcg::setEnum(nodemap, "BalanceWhiteAuto", "Off", false);
 
-          usleep(100*1000);
+          usleep(100 * 1000);
 
           rcg::setEnum(nodemap, "BalanceRatioSelector", "Red", false);
-          c.camera_wb_ratio_red=rcg::getFloat(nodemap, "BalanceRatio", 0, 0, false, true);
+          c.camera_wb_ratio_red = rcg::getFloat(nodemap, "BalanceRatio", 0, 0, false, true);
 
           rcg::setEnum(nodemap, "BalanceRatioSelector", "Blue", false);
-          c.camera_wb_ratio_blue=rcg::getFloat(nodemap, "BalanceRatio", 0, 0, false, true);
+          c.camera_wb_ratio_blue = rcg::getFloat(nodemap, "BalanceRatio", 0, 0, false, true);
         }
       }
 
-      if (level&4096)
+      if (level & 4096)
       {
         rcg::setEnum(nodemap, "BalanceRatioSelector", "Red", false);
-        color_ok=rcg::setFloat(nodemap, "BalanceRatio", c.camera_wb_ratio_red, false);
+        color_ok = rcg::setFloat(nodemap, "BalanceRatio", c.camera_wb_ratio_red, false);
       }
 
-      if (level&8192)
+      if (level & 8192)
       {
         rcg::setEnum(nodemap, "BalanceRatioSelector", "Blue", false);
-        color_ok=rcg::setFloat(nodemap, "BalanceRatio", c.camera_wb_ratio_blue, false);
+        color_ok = rcg::setFloat(nodemap, "BalanceRatio", c.camera_wb_ratio_blue, false);
       }
 
       if (!color_ok)
       {
-        c.camera_wb_auto=true;
-        c.camera_wb_ratio_red=1.2;
-        c.camera_wb_ratio_blue=2.4;
+        c.camera_wb_auto = true;
+        c.camera_wb_ratio_red = 1.2;
+        c.camera_wb_ratio_blue = 2.4;
       }
 
-      if (level&16384)
+      if (level & 16384)
       {
         // correct configuration strings if needed
 
         if (c.depth_acquisition_mode == "S" || c.depth_acquisition_mode == "SingleFrame")
         {
-          c.depth_acquisition_mode="SingleFrame";
+          c.depth_acquisition_mode = "SingleFrame";
         }
         else if (c.depth_acquisition_mode == "O" || c.depth_acquisition_mode == "SingleFrameOut1")
         {
-          c.depth_acquisition_mode="SingleFrameOut1";
+          c.depth_acquisition_mode = "SingleFrameOut1";
         }
         else if (c.depth_acquisition_mode == "C" || c.depth_acquisition_mode == "Continuous")
         {
-          c.depth_acquisition_mode="Continuous";
+          c.depth_acquisition_mode = "Continuous";
         }
         else
         {
-          c.depth_acquisition_mode="Continuous";
+          c.depth_acquisition_mode = "Continuous";
         }
 
         rcg::setEnum(nodemap, "DepthAcquisitionMode", c.depth_acquisition_mode.c_str(), true);
       }
 
-      if (level&32768)
+      if (level & 32768)
       {
         if (c.depth_quality == "Full" || c.depth_quality == "F")
         {
-          c.depth_quality="Full";
+          c.depth_quality = "Full";
         }
         else if (c.depth_quality == "High" || c.depth_quality == "H")
         {
-          c.depth_quality="High";
+          c.depth_quality = "High";
         }
         else if (c.depth_quality == "Medium" || c.depth_quality == "M")
         {
-          c.depth_quality="Medium";
+          c.depth_quality = "Medium";
         }
         else if (c.depth_quality == "Low" || c.depth_quality == "L")
         {
-          c.depth_quality="Low";
+          c.depth_quality = "Low";
         }
         else
         {
-          c.depth_quality="High";
+          c.depth_quality = "High";
         }
 
         try
         {
           rcg::setEnum(nodemap, "DepthQuality", c.depth_quality.c_str(), true);
         }
-        catch (const std::exception &)
+        catch (const std::exception&)
         {
-          c.depth_quality="High";
+          c.depth_quality = "High";
           rcg::setEnum(nodemap, "DepthQuality", c.depth_quality.c_str(), false);
 
           ROS_ERROR("rc_genicam_driver: Cannot set full quality. Sensor may have no 'stereo_plus' license!");
         }
       }
 
-      if (level&65536)
+      if (level & 65536)
       {
         rcg::setBoolean(nodemap, "DepthStaticScene", c.depth_static_scene, true);
       }
 
-      if (level&131072)
+      if (level & 131072)
       {
         rcg::setInteger(nodemap, "DepthDispRange", c.depth_disprange, true);
       }
 
-      if (level&262144)
+      if (level & 262144)
       {
         rcg::setInteger(nodemap, "DepthSeg", c.depth_seg, true);
       }
 
-      if (level&524288 && c.depth_smooth != config.depth_smooth)
+      if (level & 524288 && c.depth_smooth != config.depth_smooth)
       {
         try
         {
           rcg::setBoolean(nodemap, "DepthSmooth", c.depth_smooth, true);
         }
-        catch (const std::exception &)
+        catch (const std::exception&)
         {
-          c.depth_smooth=false;
+          c.depth_smooth = false;
           rcg::setBoolean(nodemap, "DepthSmooth", c.depth_smooth, false);
 
           ROS_ERROR("rc_genicam_driver: Cannot switch on smoothing. Sensor may have no 'stereo_plus' license!");
         }
       }
 
-      if (level&1048576)
+      if (level & 1048576)
       {
         rcg::setInteger(nodemap, "DepthFill", c.depth_fill, true);
       }
 
-      if (level&2097152)
+      if (level & 2097152)
       {
         rcg::setFloat(nodemap, "DepthMinConf", c.depth_minconf, true);
       }
 
-      if (level&4194304)
+      if (level & 4194304)
       {
         rcg::setFloat(nodemap, "DepthMinDepth", c.depth_mindepth, true);
       }
 
-      if (level&8388608)
+      if (level & 8388608)
       {
         rcg::setFloat(nodemap, "DepthMaxDepth", c.depth_maxdepth, true);
       }
 
-      if (level&16777216)
+      if (level & 16777216)
       {
         rcg::setFloat(nodemap, "DepthMaxDepthErr", c.depth_maxdeptherr, true);
       }
 
-      if ((level&33554432) && c.ptp_enabled != config.ptp_enabled)
+      if ((level & 33554432) && c.ptp_enabled != config.ptp_enabled)
       {
         if (!rcg::setBoolean(nodemap, "GevIEEE1588", c.ptp_enabled, false))
         {
           ROS_ERROR("rc_sensor_visard: Cannot change PTP.");
-          c.ptp_enabled=false;
+          c.ptp_enabled = false;
         }
       }
 
-      if ((level&67108864) && c.out1_mode != config.out1_mode)
+      if ((level & 67108864) && c.out1_mode != config.out1_mode)
       {
-        if (c.out1_mode != "Low" &&
-            c.out1_mode != "High" &&
-            c.out1_mode != "ExposureActive" &&
+        if (c.out1_mode != "Low" && c.out1_mode != "High" && c.out1_mode != "ExposureActive" &&
             c.out1_mode != "ExposureAlternateActive")
         {
-          c.out1_mode="Low";
+          c.out1_mode = "Low";
         }
 
         rcg::setEnum(nodemap, "LineSelector", "Out1", true);
 
         if (!rcg::setEnum(nodemap, "LineSource", c.out1_mode.c_str(), false))
         {
-          c.out1_mode="Low";
+          c.out1_mode = "Low";
           ROS_ERROR("rc_sensor_visard: Cannot change out1 mode. Sensor may have no 'iocontrol' license!");
         }
       }
 
-      if (level&134217728 && c.out2_mode != config.out2_mode)
+      if (level & 134217728 && c.out2_mode != config.out2_mode)
       {
-        if (c.out2_mode != "Low" &&
-            c.out2_mode != "High" &&
-            c.out2_mode != "ExposureActive" &&
+        if (c.out2_mode != "Low" && c.out2_mode != "High" && c.out2_mode != "ExposureActive" &&
             c.out2_mode != "ExposureAlternateActive")
         {
-          c.out2_mode="Low";
+          c.out2_mode = "Low";
         }
 
         rcg::setEnum(nodemap, "LineSelector", "Out2", true);
 
         if (!rcg::setEnum(nodemap, "LineSource", c.out2_mode.c_str(), false))
         {
-          c.out2_mode="Low";
+          c.out2_mode = "Low";
           ROS_ERROR("rc_sensor_visard: Cannot change out2 mode. Sensor may have no 'iocontrol' license!");
         }
       }
     }
   }
-  catch (const std::exception &ex)
+  catch (const std::exception& ex)
   {
     ROS_ERROR_STREAM("rc_genicam_driver: " << ex.what());
   }
 
-  config=c;
+  config = c;
 }
 
 void GenICamDeviceNodelet::updateSubscriptions(bool force)
@@ -687,8 +681,8 @@ void GenICamDeviceNodelet::updateSubscriptions(bool force)
 
   // collect required components and color
 
-  int rcomponents=0;
-  bool rcolor=false;
+  int rcomponents = 0;
+  bool rcolor = false;
 
   for (auto&& p : pub)
   {
@@ -706,27 +700,25 @@ void GenICamDeviceNodelet::updateSubscriptions(bool force)
 
   const static struct
   {
-    const char *name;
-    int         flag;
-  } comp[] =
-  {
-    { "Intensity", GenICam2RosPublisher::ComponentIntensity },
-    { "IntensityCombined", GenICam2RosPublisher::ComponentIntensityCombined },
-    { "Disparity", GenICam2RosPublisher::ComponentDisparity },
-    { "Confidence", GenICam2RosPublisher::ComponentConfidence },
-    { "Error", GenICam2RosPublisher::ComponentError },
-    { 0, 0 }
-  };
+    const char* name;
+    int flag;
+  } comp[] = { { "Intensity", GenICam2RosPublisher::ComponentIntensity },
+               { "IntensityCombined", GenICam2RosPublisher::ComponentIntensityCombined },
+               { "Disparity", GenICam2RosPublisher::ComponentDisparity },
+               { "Confidence", GenICam2RosPublisher::ComponentConfidence },
+               { "Error", GenICam2RosPublisher::ComponentError },
+               { 0, 0 } };
 
-  for (size_t i=0; comp[i].name != 0; i++)
+  for (size_t i = 0; comp[i].name != 0; i++)
   {
-    if (((rcomponents^scomponents) & comp[i].flag) || force)
+    if (((rcomponents ^ scomponents) & comp[i].flag) || force)
     {
       rcg::setEnum(nodemap, "ComponentSelector", comp[i].name, true);
       rcg::setBoolean(nodemap, "ComponentEnable", (rcomponents & comp[i].flag), true);
 
-      const char *status="disabled";
-      if (rcomponents & comp[i].flag) status="enabled";
+      const char* status = "disabled";
+      if (rcomponents & comp[i].flag)
+        status = "enabled";
 
       if (!force)
       {
@@ -739,10 +731,10 @@ void GenICamDeviceNodelet::updateSubscriptions(bool force)
 
   if (rcolor != scolor || force)
   {
-    const char *format="Mono8";
+    const char* format = "Mono8";
     if (rcolor)
     {
-      format="YCbCr411_8";
+      format = "YCbCr411_8";
     }
 
     rcg::setEnum(nodemap, "ComponentSelector", "Intensity", true);
@@ -753,8 +745,8 @@ void GenICamDeviceNodelet::updateSubscriptions(bool force)
 
   // store current settings
 
-  scomponents=rcomponents;
-  scolor=rcolor;
+  scomponents = rcomponents;
+  scolor = rcolor;
 }
 
 void GenICamDeviceNodelet::subChanged()
@@ -762,7 +754,7 @@ void GenICamDeviceNodelet::subChanged()
   updateSubscriptions(false);
 }
 
-void GenICamDeviceNodelet::publishConnectionDiagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat)
+void GenICamDeviceNodelet::publishConnectionDiagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat)
 {
   stat.add("connection_loss_total", connection_loss_total);
   stat.add("complete_buffers_total", complete_buffers_total);
@@ -802,10 +794,9 @@ void GenICamDeviceNodelet::publishConnectionDiagnostics(diagnostic_updater::Diag
     // no one requested images -> node is ok but stale
     stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Idle");
   }
-
 }
 
-void GenICamDeviceNodelet::publishDeviceDiagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat)
+void GenICamDeviceNodelet::publishDeviceDiagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat)
 {
   if (device_serial.empty())
   {
@@ -824,36 +815,33 @@ void GenICamDeviceNodelet::publishDeviceDiagnostics(diagnostic_updater::Diagnost
 
 namespace
 {
-
-std::vector<std::shared_ptr<rcg::Device> > getSupportedDevices(const std::string &devid,
-  const std::vector<std::string> &iname)
+std::vector<std::shared_ptr<rcg::Device> > getSupportedDevices(const std::string& devid,
+                                                               const std::vector<std::string>& iname)
 {
-  std::vector<std::shared_ptr<rcg::System> > system=rcg::System::getSystems();
+  std::vector<std::shared_ptr<rcg::System> > system = rcg::System::getSystems();
   std::vector<std::shared_ptr<rcg::Device> > ret;
 
-  for (size_t i=0; i<system.size(); i++)
+  for (size_t i = 0; i < system.size(); i++)
   {
     system[i]->open();
 
-    std::vector<std::shared_ptr<rcg::Interface> > interf=system[i]->getInterfaces();
+    std::vector<std::shared_ptr<rcg::Interface> > interf = system[i]->getInterfaces();
 
-    for (size_t k=0; k<interf.size(); k++)
+    for (size_t k = 0; k < interf.size(); k++)
     {
-      if (interf[k]->getTLType() == "GEV" && (iname.size() == 0 ||
-        std::find(iname.begin(), iname.end(), interf[k]->getID()) != iname.end()))
+      if (interf[k]->getTLType() == "GEV" &&
+          (iname.size() == 0 || std::find(iname.begin(), iname.end(), interf[k]->getID()) != iname.end()))
       {
         interf[k]->open();
 
-        std::vector<std::shared_ptr<rcg::Device> > device=interf[k]->getDevices();
+        std::vector<std::shared_ptr<rcg::Device> > device = interf[k]->getDevices();
 
-        for (size_t j=0; j<device.size(); j++)
+        for (size_t j = 0; j < device.size(); j++)
         {
           if (device[j]->getVendor() == "Roboception GmbH" &&
-            (device[j]->getModel().substr(0, 9) == "rc_visard" ||
-             device[j]->getModel().substr(0, 7) == "rc_cube") &&
-            (devid == "*" || device[j]->getID() == devid ||
-             device[j]->getSerialNumber() == devid ||
-             device[j]->getDisplayName() == devid))
+              (device[j]->getModel().substr(0, 9) == "rc_visard" || device[j]->getModel().substr(0, 7) == "rc_cube") &&
+              (devid == "*" || device[j]->getID() == devid || device[j]->getSerialNumber() == devid ||
+               device[j]->getDisplayName() == devid))
           {
             ret.push_back(device[j]);
           }
@@ -871,13 +859,13 @@ std::vector<std::shared_ptr<rcg::Device> > getSupportedDevices(const std::string
 
 class NoDeviceException : public std::invalid_argument
 {
-  public:
-
-    NoDeviceException(const char *msg) : std::invalid_argument(msg)
-    { }
+public:
+  NoDeviceException(const char* msg) : std::invalid_argument(msg)
+  {
+  }
 };
 
-void split(std::vector<std::string> &list, const std::string &s, char delim, bool skip_empty=true)
+void split(std::vector<std::string>& list, const std::string& s, char delim, bool skip_empty = true)
 {
   std::stringstream in(s);
   std::string elem;
@@ -891,21 +879,21 @@ void split(std::vector<std::string> &list, const std::string &s, char delim, boo
   }
 }
 
-}
+}  // namespace
 
 void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 {
   try
   {
-    device_model="";
-    device_version="";
-    device_serial="";
-    device_mac="";
-    device_name="";
-    device_interface="";
-    device_ip="";
-    gev_packet_size=0;
-    current_reconnect_trial=1;
+    device_model = "";
+    device_version = "";
+    device_serial = "";
+    device_mac = "";
+    device_name = "";
+    device_interface = "";
+    device_ip = "";
+    gev_packet_size = 0;
+    current_reconnect_trial = 1;
 
     ROS_INFO_STREAM("rc_genicam_driver: Grabbing thread started for device '" << id << "'");
 
@@ -913,7 +901,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
     while (running)
     {
-      streaming=false;
+      streaming = false;
 
       // report standard exceptions and try again
 
@@ -926,11 +914,11 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
           // open device and get nodemap
 
-          std::vector<std::string> iname; // empty
-          std::string dname=id;
+          std::vector<std::string> iname;  // empty
+          std::string dname = id;
 
           {
-            size_t i=dname.find(':');
+            size_t i = dname.find(':');
             if (i != std::string::npos)
             {
               if (i > 0)
@@ -938,15 +926,15 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
                 iname.push_back(id.substr(0, i));
               }
 
-              dname=dname.substr(i+1);
+              dname = dname.substr(i + 1);
             }
           }
 
-          std::vector<std::shared_ptr<rcg::Device> > devices=getSupportedDevices(dname, iname);
+          std::vector<std::shared_ptr<rcg::Device> > devices = getSupportedDevices(dname, iname);
 
           if (devices.size() == 0)
           {
-            throw NoDeviceException(("Cannot find device '"+id+"'").c_str());
+            throw NoDeviceException(("Cannot find device '" + id + "'").c_str());
           }
 
           if (devices.size() > 1)
@@ -954,7 +942,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
             throw std::invalid_argument("Too many devices, please specify unique ID");
           }
 
-          dev=devices[0];
+          dev = devices[0];
           dev->open(access);
           nodemap = dev->getRemoteNodeMap();
 
@@ -967,53 +955,53 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
           // get serial number and IP
 
-          device_interface=dev->getParent()->getID();
-          device_serial=dev->getSerialNumber();
-          device_mac=rcg::getString(nodemap, "GevMACAddress", true);
-          device_name=rcg::getString(nodemap, "DeviceUserID", true);
-          device_ip=rcg::getString(nodemap, "GevCurrentIPAddress", true);
+          device_interface = dev->getParent()->getID();
+          device_serial = dev->getSerialNumber();
+          device_mac = rcg::getString(nodemap, "GevMACAddress", true);
+          device_name = rcg::getString(nodemap, "DeviceUserID", true);
+          device_ip = rcg::getString(nodemap, "GevCurrentIPAddress", true);
 
-          ROS_INFO_STREAM("rc_genicam_driver: " << "Connecting to sensor '"
-            << device_interface << ":" << device_serial << "' alias "
-            << dev->getDisplayName());
+          ROS_INFO_STREAM("rc_genicam_driver: "
+                          << "Connecting to sensor '" << device_interface << ":" << device_serial << "' alias "
+                          << dev->getDisplayName());
 
           updater.setHardwareID(device_serial);
 
           // ensure that device version >= 20.04
 
-          device_version=rcg::getString(nodemap, "DeviceVersion");
+          device_version = rcg::getString(nodemap, "DeviceVersion");
 
           std::vector<std::string> list;
           split(list, device_version, '.');
 
-          if (list.size() < 3 || std::stoi(list[0]) < 20 ||
-              (std::stoi(list[0]) == 20 && std::stoi(list[1]) < 4))
+          if (list.size() < 3 || std::stoi(list[0]) < 20 || (std::stoi(list[0]) == 20 && std::stoi(list[1]) < 4))
           {
-            running=false;
-            throw std::invalid_argument("Device version must be 20.04 or higher: "+device_version);
+            running = false;
+            throw std::invalid_argument("Device version must be 20.04 or higher: " + device_version);
           }
 
           // get model type of the device
 
-          device_model=rcg::getString(nodemap, "DeviceModelName");
+          device_model = rcg::getString(nodemap, "DeviceModelName");
 
           // initialise configuration and start dynamic reconfigure server
 
           if (!reconfig)
           {
             initConfiguration();
-            reconfig = new dynamic_reconfigure::Server<rc_genicam_driver::rc_genicam_driverConfig>(reconfig_mtx, getPrivateNodeHandle());
+            reconfig = new dynamic_reconfigure::Server<rc_genicam_driver::rc_genicam_driverConfig>(
+                reconfig_mtx, getPrivateNodeHandle());
           }
 
           // initialize some values as the old values are checked in the
           // reconfigure callback
 
-          config.depth_smooth=rcg::getBoolean(nodemap, "DepthSmooth", true);
+          config.depth_smooth = rcg::getBoolean(nodemap, "DepthSmooth", true);
 
           rcg::setEnum(nodemap, "LineSelector", "Out1", true);
-          config.out1_mode=rcg::getEnum(nodemap, "LineSource", true);
+          config.out1_mode = rcg::getEnum(nodemap, "LineSource", true);
           rcg::setEnum(nodemap, "LineSelector", "Out2", true);
-          config.out2_mode=rcg::getEnum(nodemap, "LineSource", true);
+          config.out2_mode = rcg::getEnum(nodemap, "LineSource", true);
 
           config.ptp_enabled = rcg::getBoolean(nodemap, "GevIEEE1588", false);
 
@@ -1032,11 +1020,11 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
         // set up chunk adapter
 
-        chunkadapter=rcg::getChunkAdapter(nodemap, dev->getTLType());
+        chunkadapter = rcg::getChunkAdapter(nodemap, dev->getTLType());
 
         // check for color and iocontrol
 
-        bool color=false;
+        bool color = false;
 
         {
           std::vector<std::string> formats;
@@ -1052,11 +1040,12 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
           }
         }
 
-        bool iocontrol_avail=nodemap->_GetNode("LineSource")->GetAccessMode() == GenApi::RW;
+        bool iocontrol_avail = nodemap->_GetNode("LineSource")->GetAccessMode() == GenApi::RW;
 
         if (!color)
         {
-          ROS_INFO("rc_genicam_driver: Not a color camera. wb_auto, wb_ratio_red and wb_ratio_blue are without function.");
+          ROS_INFO("rc_genicam_driver: Not a color camera. wb_auto, wb_ratio_red and wb_ratio_blue are without "
+                   "function.");
         }
 
         if (nodemap->_GetNode("DepthSmooth")->GetAccessMode() != GenApi::RW)
@@ -1073,11 +1062,11 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
         ros::NodeHandle nh(getNodeHandle(), "stereo");
         image_transport::ImageTransport it(nh);
-        std::function<void()> callback=std::bind(&GenICamDeviceNodelet::subChanged, this);
+        std::function<void()> callback = std::bind(&GenICamDeviceNodelet::subChanged, this);
 
         pub.clear();
-        scomponents=0;
-        scolor=false;
+        scomponents = 0;
+        scolor = false;
 
         pub.push_back(std::make_shared<CameraInfoPublisher>(nh, frame_id, true, callback));
         pub.push_back(std::make_shared<CameraInfoPublisher>(nh, frame_id, false, callback));
@@ -1126,7 +1115,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
         stream[0]->open();
         stream[0]->startStreaming();
 
-        current_reconnect_trial=1;
+        current_reconnect_trial = 1;
 
         updater.force_update();
 
@@ -1138,19 +1127,19 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
         {
           // grab next buffer
 
-          const rcg::Buffer* buffer=stream[0]->grab(500);
+          const rcg::Buffer* buffer = stream[0]->grab(500);
           std::string out1_mode_on_sensor;
 
           // process buffer
 
           if (buffer)
           {
-            streaming=true;
+            streaming = true;
 
             if (buffer->getIsIncomplete())
             {
               incomplete_buffers_total++;
-              out1_mode_on_sensor="";
+              out1_mode_on_sensor = "";
             }
             else
             {
@@ -1160,27 +1149,27 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
               if (gev_packet_size == 0)
               {
-                gev_packet_size=rcg::getInteger(nodemap, "GevSCPSPacketSize", 0, 0, true, false);
+                gev_packet_size = rcg::getInteger(nodemap, "GevSCPSPacketSize", 0, 0, true, false);
               }
 
               // attach buffer to nodemap to access chunk data
 
               chunkadapter->AttachBuffer(reinterpret_cast<std::uint8_t*>(buffer->getGlobalBase()),
-                                                                         buffer->getSizeFilled());
+                                         buffer->getSizeFilled());
 
               // get out1 mode on device, which may have changed
 
               rcg::setEnum(nodemap, "ChunkLineSelector", "Out1", true);
-              out1_mode_on_sensor=rcg::getEnum(nodemap, "ChunkLineSource", true);
+              out1_mode_on_sensor = rcg::getEnum(nodemap, "ChunkLineSource", true);
 
               // publish all parts of buffer
 
-              uint32_t npart=buffer->getNumberOfParts();
-              for (uint32_t part=0; part<npart; part++)
+              uint32_t npart = buffer->getNumberOfParts();
+              for (uint32_t part = 0; part < npart; part++)
               {
                 if (buffer->getImagePresent(part))
                 {
-                  uint64_t pixelformat=buffer->getPixelFormat(part);
+                  uint64_t pixelformat = buffer->getPixelFormat(part);
                   for (auto&& p : pub)
                   {
                     p->publish(buffer, part, pixelformat);
@@ -1196,14 +1185,14 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
           else
           {
             image_receive_timeouts_total++;
-            streaming=false;
+            streaming = false;
 
             // get out1 mode from sensor (this is also used to check if the
             // connection is still valid)
 
             std::lock_guard<std::recursive_mutex> lock(device_mtx);
             rcg::setEnum(nodemap, "LineSelector", "Out1", true);
-            out1_mode_on_sensor=rcg::getString(nodemap, "LineSource", true, true);
+            out1_mode_on_sensor = rcg::getString(nodemap, "LineSource", true, true);
           }
 
           {
@@ -1216,12 +1205,12 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
             if (out1_mode_on_sensor.size() == 0)
             {
               // use current settings if the value on the sensor cannot be determined
-              out1_mode_on_sensor=config.out1_mode;
+              out1_mode_on_sensor = config.out1_mode;
             }
 
             if (out1_mode_on_sensor != config.out1_mode)
             {
-              config.out1_mode=out1_mode_on_sensor;
+              config.out1_mode = out1_mode_on_sensor;
               reconfig->updateConfig(config);
             }
           }
@@ -1238,26 +1227,26 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
         // stop publishing
 
-        device_model="";
-        device_version="";
-        device_serial="";
-        device_mac="";
-        device_name="";
-        device_interface="";
-        device_ip="";
-        gev_packet_size=0;
-        streaming=false;
+        device_model = "";
+        device_version = "";
+        device_serial = "";
+        device_mac = "";
+        device_name = "";
+        device_interface = "";
+        device_ip = "";
+        gev_packet_size = 0;
+        streaming = false;
 
         updater.force_update();
       }
-      catch (const NoDeviceException &ex)
+      catch (const NoDeviceException& ex)
       {
         // report error, wait and retry
 
         ROS_WARN_STREAM("rc_genicam_driver: " << ex.what());
 
         current_reconnect_trial++;
-        streaming=false;
+        streaming = false;
         pub.clear();
 
         updater.force_update();
@@ -1273,15 +1262,15 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
           connection_loss_total++;
         }
 
-        device_model="";
-        device_version="";
-        device_serial="";
-        device_mac="";
-        device_name="";
-        device_interface="";
-        device_ip="";
-        gev_packet_size=0;
-        streaming=false;
+        device_model = "";
+        device_version = "";
+        device_serial = "";
+        device_mac = "";
+        device_name = "";
+        device_interface = "";
+        device_ip = "";
+        gev_packet_size = 0;
+        streaming = false;
 
         current_reconnect_trial++;
         pub.clear();
@@ -1315,21 +1304,21 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
     ROS_FATAL_STREAM("rc_genicam_driver: Unknown exception");
   }
 
-  device_model="";
-  device_version="";
-  device_serial="";
-  device_mac="";
-  device_name="";
-  device_interface="";
-  device_ip="";
-  gev_packet_size=0;
-  streaming=false;
+  device_model = "";
+  device_version = "";
+  device_serial = "";
+  device_mac = "";
+  device_name = "";
+  device_interface = "";
+  device_ip = "";
+  gev_packet_size = 0;
+  streaming = false;
   updater.force_update();
 
-  running=false;
+  running = false;
   ROS_INFO("rc_genicam_driver: Grabbing thread stopped");
 }
 
-} // namespace rc
+}  // namespace rc
 
 PLUGINLIB_EXPORT_CLASS(rc::GenICamDeviceNodelet, nodelet::Nodelet)

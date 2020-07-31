@@ -38,26 +38,25 @@
 
 namespace rc
 {
-
-CameraParamPublisher::CameraParamPublisher(ros::NodeHandle& nh,
-  const std::string& frame_id, bool left, std::function<void()> &sub_changed) :
-  GenICam2RosPublisher(frame_id)
+CameraParamPublisher::CameraParamPublisher(ros::NodeHandle& nh, const std::string& frame_id, bool left,
+                                           std::function<void()>& sub_changed)
+  : GenICam2RosPublisher(frame_id)
 {
   // advertise topic
 
-  sub_callback=sub_changed;
+  sub_callback = sub_changed;
 
   if (left)
   {
     pub = nh.advertise<rc_common_msgs::CameraParam>("left/camera_param", 1,
-      boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
-      boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
+                                                    boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
+                                                    boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
   }
   else
   {
     pub = nh.advertise<rc_common_msgs::CameraParam>("right/camera_param", 1,
-      boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
-      boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
+                                                    boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
+                                                    boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
   }
 }
 
@@ -66,18 +65,17 @@ bool CameraParamPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void CameraParamPublisher::requiresComponents(int &components, bool &color)
+void CameraParamPublisher::requiresComponents(int& components, bool& color)
 {
   if (pub.getNumSubscribers() > 0)
   {
-    components|=ComponentIntensity;
+    components |= ComponentIntensity;
   }
 }
 
 void CameraParamPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat)
 {
-  if (nodemap && pub.getNumSubscribers() > 0 &&
-      (pixelformat == Mono8 || pixelformat == YCbCr411_8))
+  if (nodemap && pub.getNumSubscribers() > 0 && (pixelformat == Mono8 || pixelformat == YCbCr411_8))
   {
     uint64_t time = buffer->getTimestampNS();
 
@@ -106,7 +104,7 @@ void CameraParamPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uin
     param.line_status_all = rcg::getInteger(nodemap, "ChunkLineStatusAll", 0, 0, true);
 
     param.gain = rcg::getFloat(nodemap, "ChunkGain", 0, 0, true);
-    param.exposure_time = rcg::getFloat(nodemap, "ChunkExposureTime", 0, 0, true)/1000000l;
+    param.exposure_time = rcg::getFloat(nodemap, "ChunkExposureTime", 0, 0, true) / 1000000l;
 
     rc_common_msgs::KeyValue kv;
 
@@ -120,4 +118,4 @@ void CameraParamPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uin
   }
 }
 
-}
+}  // namespace rc

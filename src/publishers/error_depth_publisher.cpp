@@ -40,19 +40,18 @@
 
 namespace rc
 {
-
 ErrorDepthPublisher::ErrorDepthPublisher(ros::NodeHandle& nh, const std::string& frame_id,
-  std::function<void()> &sub_changed) : GenICam2RosPublisher(frame_id)
+                                         std::function<void()>& sub_changed)
+  : GenICam2RosPublisher(frame_id)
 {
-  f=0;
-  t=0;
-  invalid=-1;
-  scale=1;
+  f = 0;
+  t = 0;
+  invalid = -1;
+  scale = 1;
 
-  sub_callback=sub_changed;
-  pub = nh.advertise<sensor_msgs::Image>("error_depth", 1,
-    boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
-    boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
+  sub_callback = sub_changed;
+  pub = nh.advertise<sensor_msgs::Image>("error_depth", 1, boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
+                                         boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
 }
 
 bool ErrorDepthPublisher::used()
@@ -60,11 +59,11 @@ bool ErrorDepthPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void ErrorDepthPublisher::requiresComponents(int &components, bool &color)
+void ErrorDepthPublisher::requiresComponents(int& components, bool& color)
 {
   if (pub.getNumSubscribers() > 0)
   {
-    components|=ComponentDisparity|ComponentError;
+    components |= ComponentDisparity | ComponentError;
   }
 }
 
@@ -79,13 +78,13 @@ void ErrorDepthPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint
       disp_list.add(buffer, part);
 
       rcg::setEnum(nodemap, "ChunkComponentSelector", "Disparity", true);
-      f=rcg::getFloat(nodemap, "ChunkScan3dFocalLength", 0, 0, true);
-      t=rcg::getFloat(nodemap, "ChunkScan3dBaseline", 0, 0, true);
+      f = rcg::getFloat(nodemap, "ChunkScan3dFocalLength", 0, 0, true);
+      t = rcg::getFloat(nodemap, "ChunkScan3dBaseline", 0, 0, true);
 
-      invalid=-1;
+      invalid = -1;
       if (rcg::getBoolean(nodemap, "ChunkScan3dInvalidDataFlag", false))
       {
-        invalid=rcg::getFloat(nodemap, "ChunkScan3dInvalidDataValue", 0, 0, true);
+        invalid = rcg::getFloat(nodemap, "ChunkScan3dInvalidDataValue", 0, 0, true);
       }
 
       scale = rcg::getFloat(nodemap, "ChunkScan3dCoordinateScale", 0, 0, true);
@@ -123,10 +122,10 @@ void ErrorDepthPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint
         // get pointer to image data in buffer
 
         size_t dpx = disp->getXPadding();
-        const uint8_t *dps = disp->getPixels();
+        const uint8_t* dps = disp->getPixels();
 
         size_t epx = err->getXPadding();
-        const uint8_t *eps = err->getPixels();
+        const uint8_t* eps = err->getPixels();
 
         // convert image data
 
@@ -135,7 +134,7 @@ void ErrorDepthPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint
         im->step = im->width * sizeof(float);
 
         im->data.resize(im->step * im->height);
-        float *pt = reinterpret_cast<float*>(&im->data[0]);
+        float* pt = reinterpret_cast<float*>(&im->data[0]);
 
         float s = scale * f * t;
 
@@ -180,9 +179,9 @@ void ErrorDepthPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint
       }
       else
       {
-        ROS_ERROR_STREAM("Size of disparity and error images differ: "
-          << disp->getWidth() << "x" << disp->getHeight()
-          << " != " << err->getWidth() << "x" << err->getHeight());
+        ROS_ERROR_STREAM("Size of disparity and error images differ: " << disp->getWidth() << "x" << disp->getHeight()
+                                                                       << " != " << err->getWidth() << "x"
+                                                                       << err->getHeight());
       }
 
       // remove all old images, including the current ones
@@ -192,4 +191,4 @@ void ErrorDepthPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint
     }
   }
 }
-}
+}  // namespace rc

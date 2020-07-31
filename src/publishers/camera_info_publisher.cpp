@@ -38,9 +38,9 @@
 
 namespace rc
 {
-CameraInfoPublisher::CameraInfoPublisher(ros::NodeHandle& nh,
-  const std::string& frame_id, bool _left, std::function<void()> &sub_changed) :
-  GenICam2RosPublisher(frame_id)
+CameraInfoPublisher::CameraInfoPublisher(ros::NodeHandle& nh, const std::string& frame_id, bool _left,
+                                         std::function<void()>& sub_changed)
+  : GenICam2RosPublisher(frame_id)
 {
   // prepare camera info message
 
@@ -89,22 +89,22 @@ CameraInfoPublisher::CameraInfoPublisher(ros::NodeHandle& nh,
 
   // advertise topic
 
-  left=_left;
+  left = _left;
 
   if (left)
   {
-    sub_callback=sub_changed;
+    sub_callback = sub_changed;
     pub = nh.advertise<sensor_msgs::CameraInfo>("left/camera_info", 1,
-      boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
-      boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
+                                                boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
+                                                boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
     left = true;
   }
   else
   {
-    sub_callback=sub_changed;
+    sub_callback = sub_changed;
     pub = nh.advertise<sensor_msgs::CameraInfo>("right/camera_info", 1,
-      boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
-      boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
+                                                boost::bind(&GenICam2RosPublisher::subChanged, this, _1),
+                                                boost::bind(&GenICam2RosPublisher::subChanged, this, _1));
     left = false;
   }
 }
@@ -114,18 +114,17 @@ bool CameraInfoPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void CameraInfoPublisher::requiresComponents(int &components, bool &color)
+void CameraInfoPublisher::requiresComponents(int& components, bool& color)
 {
   if (pub.getNumSubscribers() > 0)
   {
-    components|=ComponentIntensity;
+    components |= ComponentIntensity;
   }
 }
 
 void CameraInfoPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat)
 {
-  if (nodemap && pub.getNumSubscribers() > 0 &&
-      (pixelformat == Mono8 || pixelformat == YCbCr411_8))
+  if (nodemap && pub.getNumSubscribers() > 0 && (pixelformat == Mono8 || pixelformat == YCbCr411_8))
   {
     uint64_t time = buffer->getTimestampNS();
 
@@ -146,8 +145,8 @@ void CameraInfoPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint
       rcg::setEnum(nodemap, "ChunkComponentSelector", "Intensity", true);
     }
 
-    double f=rcg::getFloat(nodemap, "ChunkScan3dFocalLength", 0, 0, true);
-    double t=rcg::getFloat(nodemap, "ChunkScan3dBaseline", 0, 0, true);
+    double f = rcg::getFloat(nodemap, "ChunkScan3dFocalLength", 0, 0, true);
+    double t = rcg::getFloat(nodemap, "ChunkScan3dBaseline", 0, 0, true);
 
     info.K[0] = info.K[4] = f;
     info.P[0] = info.P[5] = f;
@@ -161,11 +160,11 @@ void CameraInfoPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint
     }
     else
     {
-      info.P[3] = -f*t;
+      info.P[3] = -f * t;
     }
 
     pub.publish(info);
   }
 }
 
-}
+}  // namespace rc
