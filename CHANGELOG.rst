@@ -2,7 +2,7 @@
 Changelog for package rc_genicam_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.0.0 (2020-07-27)
+0.1.0 (2020-07-31)
 ------------------
 
-* Initial release, based on rc_visard_driver
+* Initial stable release, based on rc_visard_driver
