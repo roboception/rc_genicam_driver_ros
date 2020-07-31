@@ -1,16 +1,16 @@
 
 set(SRC
-    genicam_device_nodelet.cc
-    publishers/camera_info_publisher.cc
-    publishers/camera_param_publisher.cc
-    publishers/image_publisher.cc
-    publishers/disparity_publisher.cc
-    publishers/disparity_color_publisher.cc
-    publishers/depth_publisher.cc
-    publishers/confidence_publisher.cc
-    publishers/error_disparity_publisher.cc
-    publishers/error_depth_publisher.cc
-    publishers/points2_publisher.cc
+    genicam_device_nodelet.cpp
+    publishers/camera_info_publisher.cpp
+    publishers/camera_param_publisher.cpp
+    publishers/image_publisher.cpp
+    publishers/disparity_publisher.cpp
+    publishers/disparity_color_publisher.cpp
+    publishers/depth_publisher.cpp
+    publishers/confidence_publisher.cpp
+    publishers/error_disparity_publisher.cpp
+    publishers/error_depth_publisher.cpp
+    publishers/points2_publisher.cpp
     publishers/genicam2ros_publisher.h)
 
 # build and install the nodelet
@@ -26,7 +26,7 @@ target_link_libraries(rc_genicam_driver_nodelet
     rc_genicam_api::rc_genicam_api
     ${RC_DYNAMICS_API_LIBRARIES})
 
-add_executable(rc_genicam_driver genicam_device_node.cc)
+add_executable(rc_genicam_driver genicam_device_node.cpp)
 target_link_libraries(rc_genicam_driver ${catkin_LIBRARIES})
 
 install(TARGETS rc_genicam_driver rc_genicam_driver_nodelet
