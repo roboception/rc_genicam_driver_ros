@@ -57,7 +57,7 @@ producer where rc_genicam_api is installed.
 
 If the producer .cti can't be found and you will get an error message like
 ```
-[ERROR] [1512568083.512790905]: rc_genicam_driver: No transport layers found in path /opt/ros/melodic/lib/rc_genicam_api
+[ERROR] [1512568083.512790905]: No transport layers found in path /opt/ros/melodic/lib/rc_genicam_api
 ```
 
 In this case you need either need to actually install rc_genicam_api properly or

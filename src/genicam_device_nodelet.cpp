@@ -134,7 +134,7 @@ void GenICamDeviceNodelet::onInit()
   }
   else
   {
-    ROS_FATAL_STREAM("rc_genicam_driver: Access must be 'control' or 'exclusive': " << access);
+    NODELET_FATAL_STREAM("Access must be 'control' or 'exclusive': " << access);
     return;
   }
 
@@ -421,7 +421,7 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
       {
         if (!rcg::setFloat(nodemap, "RcExposureAutoAverageMax", c.camera_exp_auto_average_max, false))
         {
-          ROS_WARN("rc_genicam_driver: rc_visard does not support parameter 'exp_auto_average_max'");
+          NODELET_WARN("rc_visard does not support parameter 'exp_auto_average_max'");
           c.camera_exp_auto_average_max = 0.75f;
         }
       }
@@ -430,7 +430,7 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
       {
         if (!rcg::setFloat(nodemap, "RcExposureAutoAverageMin", c.camera_exp_auto_average_min, false))
         {
-          ROS_WARN("rc_genicam_driver: rc_visard does not support parameter 'exp_auto_average_min'");
+          NODELET_WARN("rc_visard does not support parameter 'exp_auto_average_min'");
           c.camera_exp_auto_average_min = 0.25f;
         }
       }
@@ -564,7 +564,7 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
           c.depth_quality = "High";
           rcg::setEnum(nodemap, "DepthQuality", c.depth_quality.c_str(), false);
 
-          ROS_ERROR("rc_genicam_driver: Cannot set full quality. Sensor may have no 'stereo_plus' license!");
+          NODELET_ERROR("Cannot set full quality. Sensor may have no 'stereo_plus' license!");
         }
       }
 
@@ -594,7 +594,7 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
           c.depth_smooth = false;
           rcg::setBoolean(nodemap, "DepthSmooth", c.depth_smooth, false);
 
-          ROS_ERROR("rc_genicam_driver: Cannot switch on smoothing. Sensor may have no 'stereo_plus' license!");
+          NODELET_ERROR("Cannot switch on smoothing. Sensor may have no 'stereo_plus' license!");
         }
       }
 
@@ -627,7 +627,7 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
       {
         if (!rcg::setBoolean(nodemap, "GevIEEE1588", c.ptp_enabled, false))
         {
-          ROS_ERROR("rc_sensor_visard: Cannot change PTP.");
+          NODELET_ERROR("Cannot change PTP.");
           c.ptp_enabled = false;
         }
       }
@@ -645,7 +645,7 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
         if (!rcg::setEnum(nodemap, "LineSource", c.out1_mode.c_str(), false))
         {
           c.out1_mode = "Low";
-          ROS_ERROR("rc_sensor_visard: Cannot change out1 mode. Sensor may have no 'iocontrol' license!");
+          NODELET_ERROR("Cannot change out1 mode. Sensor may have no 'iocontrol' license!");
         }
       }
 
@@ -662,7 +662,7 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
         if (!rcg::setEnum(nodemap, "LineSource", c.out2_mode.c_str(), false))
         {
           c.out2_mode = "Low";
-          ROS_ERROR("rc_sensor_visard: Cannot change out2 mode. Sensor may have no 'iocontrol' license!");
+          NODELET_ERROR("Cannot change out2 mode. Sensor may have no 'iocontrol' license!");
         }
       }
     }
@@ -722,7 +722,7 @@ void GenICamDeviceNodelet::updateSubscriptions(bool force)
 
       if (!force)
       {
-        ROS_INFO_STREAM("rc_sensor_visard: Component '" << comp[i].name << "' " << status);
+        NODELET_INFO_STREAM("Component '" << comp[i].name << "' " << status);
       }
     }
   }
@@ -1050,12 +1050,12 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
         if (nodemap->_GetNode("DepthSmooth")->GetAccessMode() != GenApi::RW)
         {
-          ROS_WARN("rc_genicam_driver: No stereo_plus license on device. quality=full and smoothing is not available.");
+          NODELET_WARN("No stereo_plus license on device. quality=full and smoothing is not available.");
         }
 
         if (!iocontrol_avail)
         {
-          ROS_WARN("rc_genicam_driver: No iocontrol license on device. out1_mode and out2_mode are without function.");
+          NODELET_WARN("No iocontrol license on device. out1_mode and out2_mode are without function.");
         }
 
         // advertise publishers
@@ -1243,7 +1243,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
       {
         // report error, wait and retry
 
-        ROS_WARN_STREAM("rc_genicam_driver: " << ex.what());
+        NODELET_WARN(ex.what());
 
         current_reconnect_trial++;
         streaming = false;
@@ -1297,11 +1297,11 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
   }
   catch (const std::exception& ex)
   {
-    ROS_FATAL_STREAM("rc_genicam_driver: " << ex.what());
+    NODELET_FATAL(ex.what());
   }
   catch (...)
   {
-    ROS_FATAL_STREAM("rc_genicam_driver: Unknown exception");
+    NODELET_FATAL("Unknown exception");
   }
 
   device_model = "";
