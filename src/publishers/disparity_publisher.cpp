@@ -84,21 +84,10 @@ void DisparityPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint6
     double f = rcg::getFloat(nodemap, "ChunkScan3dFocalLength", 0, 0, true);
     double t = rcg::getFloat(nodemap, "ChunkScan3dBaseline", 0, 0, true);
     float scale = rcg::getFloat(nodemap, "ChunkScan3dCoordinateScale", 0, 0, true);
-    int disprange = rcg::getInteger(nodemap, "DepthDispRange", 0, 0, true);
-    std::string quality = rcg::getString(nodemap, "DepthQuality", true);
 
-    if (quality == "Full")
-    {
-      disprange *= 2;
-    }
-    else if (quality == "Medium")
-    {
-      disprange /= 2;
-    }
-    else if (quality == "Low")
-    {
-      disprange /= 3;
-    }
+    double mindepth = rcg::getFloat(nodemap, "DepthMinDepth", 0, 0, true);
+    mindepth = std::max(mindepth, 2.5*t);
+    int disprange = static_cast<int>(std::ceil(f*t/mindepth));
 
     // prepare size and format of outgoing image
 

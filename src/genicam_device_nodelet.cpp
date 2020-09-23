@@ -267,7 +267,6 @@ void GenICamDeviceNodelet::initConfiguration()
   config.depth_acquisition_mode = rcg::getEnum(nodemap, "DepthAcquisitionMode", true);
   config.depth_quality = rcg::getEnum(nodemap, "DepthQuality", true);
   config.depth_static_scene = rcg::getBoolean(nodemap, "DepthStaticScene", true);
-  config.depth_disprange = rcg::getInteger(nodemap, "DepthDispRange", 0, 0, true);
   config.depth_seg = rcg::getInteger(nodemap, "DepthSeg", 0, 0, true);
   config.depth_smooth = rcg::getBoolean(nodemap, "DepthSmooth", true);
   config.depth_fill = rcg::getInteger(nodemap, "DepthFill", 0, 0, true);
@@ -305,7 +304,6 @@ void GenICamDeviceNodelet::initConfiguration()
   pnh.param("depth_acquisition_mode", config.depth_acquisition_mode, config.depth_acquisition_mode);
   pnh.param("depth_quality", config.depth_quality, config.depth_quality);
   pnh.param("depth_static_scene", config.depth_static_scene, config.depth_static_scene);
-  pnh.param("depth_disprange", config.depth_disprange, config.depth_disprange);
   pnh.param("depth_seg", config.depth_seg, config.depth_seg);
   pnh.param("depth_smooth", config.depth_smooth, config.depth_smooth);
   pnh.param("depth_fill", config.depth_fill, config.depth_fill);
@@ -337,7 +335,6 @@ void GenICamDeviceNodelet::initConfiguration()
   pnh.setParam("depth_acquisition_mode", config.depth_acquisition_mode);
   pnh.setParam("depth_quality", config.depth_quality);
   pnh.setParam("depth_static_scene", config.depth_static_scene);
-  pnh.setParam("depth_disprange", config.depth_disprange);
   pnh.setParam("depth_seg", config.depth_seg);
   pnh.setParam("depth_smooth", config.depth_smooth);
   pnh.setParam("depth_fill", config.depth_fill);
@@ -571,11 +568,6 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
       if (level & 65536)
       {
         rcg::setBoolean(nodemap, "DepthStaticScene", c.depth_static_scene, true);
-      }
-
-      if (level & 131072)
-      {
-        rcg::setInteger(nodemap, "DepthDispRange", c.depth_disprange, true);
       }
 
       if (level & 262144)

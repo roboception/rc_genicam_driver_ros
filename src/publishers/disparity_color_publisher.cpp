@@ -88,30 +88,24 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint32_t part, 
     size_t px = buffer->getXPadding(part);
     const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase(part));
 
-    // ensure that current disprange setting is sufficient
+    // get disparity range
 
     bool bigendian = buffer->isBigEndian();
 
-    rcg::setEnum(nodemap, "ComponentSelector", "Disparity", true);
     rcg::setEnum(nodemap, "ChunkComponentSelector", "Disparity", true);
-
-    int drange = rcg::getInteger(nodemap, "DepthDispRange", 0, 0, true);
-    std::string quality = rcg::getString(nodemap, "DepthQuality", true);
-
-    if (quality == "Full")
-    {
-      drange *= 2;
-    }
-    else if (quality == "Medium")
-    {
-      drange /= 2;
-    }
-    else if (quality == "Low")
-    {
-      drange /= 3;
-    }
-
+    double f = rcg::getFloat(nodemap, "ChunkScan3dFocalLength", 0, 0, true);
+    double t = rcg::getFloat(nodemap, "ChunkScan3dBaseline", 0, 0, true);
     float scale = rcg::getFloat(nodemap, "ChunkScan3dCoordinateScale", 0, 0, true);
+
+    double mindepth = rcg::getFloat(nodemap, "DepthMinDepth", 0, 0, true);
+    mindepth = std::max(mindepth, 2.5*t);
+
+    double maxdepth = rcg::getFloat(nodemap, "DepthMaxDepth", 0, 0, true);
+    maxdepth = std::max(mindepth, maxdepth);
+
+    int dmin=static_cast<int>(std::floor(f*t/maxdepth));
+    int dmax=static_cast<int>(std::ceil(f*t/mindepth));
+    int drange=dmax-dmin+1;
 
     // convert image data
 
@@ -140,7 +134,7 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint32_t part, 
 
         if (d != 0)
         {
-          double v = scale * d / drange;
+          double v = (scale * d - dmin) / drange;
           v = v / 1.15 + 0.1;
 
           double r = std::max(0.0, std::min(1.0, (1.5 - 4 * fabs(v - 0.75))));
