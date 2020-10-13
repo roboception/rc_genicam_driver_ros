@@ -2,10 +2,14 @@
 rc_genicam_driver
 -----------------
 
-Nodelet/node providing a ROS interface to configure a [Roboception rc_visard](https://roboception.com/rc_visard)
-or rc_cube and receive images.
+Nodelet/node providing a ROS interface to configure a [Roboception](https://roboception.com)
+[rc_visard](https://roboception.com/rc_visard)
+or [rc_cube](https://roboception.com/product/rc_cube-s/) and receive images.
 
-Please also consult the manual for more details: https://doc.rc-visard.com
+Please also consult the manuals for more details:
+
+* https://doc.rc-visard.com
+* https://doc.rc-cube.com
 
 Installation
 ------------
