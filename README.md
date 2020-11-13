@@ -118,6 +118,10 @@ These parameters can be changed during runtime via dynamic reconfigure:
   up to exp_max as maximum. If false, then exp_value is used as exposure
   time in seconds.
 
+* `camera_exp_auto_mode`
+  Auto-exposure mode which can be "Normal", "Out1High" or "AdaptiveOut1".
+  Default: Normal.
+
 * `camera_exp_max`: Maximum exposure time in seconds if exp_auto is true.
 
 * `camera_exp_auto_average_max`: The auto exposure tries to set the exposure
