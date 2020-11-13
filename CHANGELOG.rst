@@ -2,6 +2,14 @@
 Changelog for package rc_genicam_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.0 (2020-11-13)
+------------------
+
+* Renaming of adaptive_out1_reduction to out1_reduction
+* Added new auto exposure mode Out1High
+* Added reporting test flag, out1 reduction and brightness in camera parameter messages
+* Update README
+
 0.2.0 (2020-09-23)
 ------------------
 
