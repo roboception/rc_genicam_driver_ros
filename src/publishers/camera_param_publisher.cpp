@@ -124,13 +124,25 @@ void CameraParamPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uin
     {
       float noise=rcg::getFloat(nodemap, "ChunkRcNoise", 0, 0, false);
       bool test=rcg::getBoolean(nodemap, "ChunkRcTest", false);
-      float adaptive_out1_reduction=rcg::getFloat(nodemap, "ChunkRcAdaptiveOut1Reduction", 0, 0, false);
+
+      float out1_reduction=0;
+
+      try
+      {
+        out1_reduction=rcg::getFloat(nodemap, "ChunkRcOut1Reduction", 0, 0, true);
+      }
+      catch (const std::exception &)
+      {
+        // can be removed if sensor version must be >= 20.10.1
+        out1_reduction=rcg::getFloat(nodemap, "ChunkRcAdaptiveOut1Reduction", 0, 0, false);
+      }
+
       float brightness=rcg::getFloat(nodemap, "ChunkRcBrightness", 0, 0, false);
 
       param.extra_data.clear();
       param.extra_data.push_back(getKeyValue("noise", noise));
       param.extra_data.push_back(getKeyValue("test", test));
-      param.extra_data.push_back(getKeyValue("adaptive_out1_reduction", adaptive_out1_reduction));
+      param.extra_data.push_back(getKeyValue("out1_reduction", out1_reduction));
       param.extra_data.push_back(getKeyValue("brightness", brightness));
     }
 
