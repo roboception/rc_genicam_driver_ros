@@ -2,6 +2,11 @@
 Changelog for package rc_genicam_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.4.0 (2020-11-20)
+------------------
+
+* Added new parameter depth_double_shot
+
 0.3.0 (2020-11-13)
 ------------------
 
