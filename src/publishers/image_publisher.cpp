@@ -108,10 +108,9 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t 
   {
     rcg::setEnum(nodemap, "ChunkLineSelector", "Out1", true);
     std::string out1_mode = rcg::getEnum(nodemap, "ChunkLineSource", true);
-    bool out1_only_low = out1_mode == "Low" || out1_mode == "ExposureAlternateActive";
     bool out1 = rcg::getInteger(nodemap, "ChunkLineStatusAll", 0, 0, true) & 0x1;
 
-    bool sub = (pub.getNumSubscribers() > 0 && (!out1_only_low || !out1));
+    bool sub = (pub.getNumSubscribers() > 0);
 
     if (!out1 && pub_out1_low.getNumSubscribers() > 0)
       sub = true;
@@ -237,8 +236,8 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t 
 
       // publish message
 
-      if (!out1_only_low || !out1)
-        pub.publish(im);
+      pub.publish(im);
+
       if (!out1)
         pub_out1_low.publish(im);
       if (out1)
