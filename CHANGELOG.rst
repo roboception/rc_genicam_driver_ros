@@ -2,6 +2,11 @@
 Changelog for package rc_genicam_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.5.0 (2020-11-20)
+------------------
+
+* Publish images without filtering on image_rect(_color) topics
+
 0.4.0 (2020-11-20)
 ------------------
 
