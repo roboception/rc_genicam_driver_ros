@@ -1,6 +1,6 @@
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package rc_genicam_driver
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 0.5.0 (2020-11-20)
 ------------------
@@ -24,7 +24,7 @@ Changelog for package rc_genicam_driver
 ------------------
 
 * Removed parameter disprange and controlling disparity range via mindepth and maxdepth
-* Changed log output from ROS_ to NODELET_
+* Changed log output from `ROS_` to `NODELET_`
 
 0.1.0 (2020-07-31)
 ------------------
