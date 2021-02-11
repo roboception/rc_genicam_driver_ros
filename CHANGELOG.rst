@@ -2,6 +2,11 @@
 Changelog for package rc_genicam_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.5.1 (2021-02-11)
+------------------
+
+* Accept devices of vendor Roboception or if model name that starts with rc_visard or rc_cube
+
 0.5.0 (2020-11-20)
 ------------------
 
