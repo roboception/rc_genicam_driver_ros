@@ -846,8 +846,8 @@ std::vector<std::shared_ptr<rcg::Device> > getSupportedDevices(const std::string
 
         for (size_t j = 0; j < device.size(); j++)
         {
-          if (device[j]->getVendor() == "Roboception GmbH" &&
-              (device[j]->getModel().substr(0, 9) == "rc_visard" || device[j]->getModel().substr(0, 7) == "rc_cube") &&
+          if ((device[j]->getVendor() == "Roboception GmbH" ||
+               device[j]->getModel().substr(0, 9) == "rc_visard" || device[j]->getModel().substr(0, 7) == "rc_cube") &&
               (devid == "*" || device[j]->getID() == devid || device[j]->getSerialNumber() == devid ||
                device[j]->getDisplayName() == devid))
           {
