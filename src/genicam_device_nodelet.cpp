@@ -281,7 +281,7 @@ void GenICamDeviceNodelet::initConfiguration()
   rcg::setEnum(nodemap, "LineSelector", "Out1", true);
   config.out1_mode = rcg::getEnum(nodemap, "LineSource", true);
 
-  rcg::setEnum(nodemap, "LineSelector", "Out2", true);
+  rcg::setEnum(nodemap, "LineSelector", "Out2", false);
   config.out2_mode = rcg::getEnum(nodemap, "LineSource", true);
 
   // try to get ROS parameters: if parameter is not set in parameter server
@@ -665,12 +665,13 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
           c.out2_mode = "Low";
         }
 
-        rcg::setEnum(nodemap, "LineSelector", "Out2", true);
-
-        if (!rcg::setEnum(nodemap, "LineSource", c.out2_mode.c_str(), false))
+        if (rcg::setEnum(nodemap, "LineSelector", "Out2", false))
         {
-          c.out2_mode = "Low";
-          NODELET_ERROR("Cannot change out2 mode. Sensor may have no 'iocontrol' license!");
+          if (!rcg::setEnum(nodemap, "LineSource", c.out2_mode.c_str(), false))
+          {
+            c.out2_mode = "Low";
+            NODELET_ERROR("Cannot change out2 mode. Sensor may have no 'iocontrol' license!");
+          }
         }
       }
     }
@@ -965,9 +966,9 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
           device_interface = dev->getParent()->getID();
           device_serial = dev->getSerialNumber();
-          device_mac = rcg::getString(nodemap, "GevMACAddress", true);
+          device_mac = rcg::getString(nodemap, "GevMACAddress", false);
           device_name = rcg::getString(nodemap, "DeviceUserID", true);
-          device_ip = rcg::getString(nodemap, "GevCurrentIPAddress", true);
+          device_ip = rcg::getString(nodemap, "GevCurrentIPAddress", false);
 
           NODELET_INFO_STREAM(""
                           << "Connecting to sensor '" << device_interface << ":" << device_serial << "' alias "
@@ -1008,7 +1009,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
           rcg::setEnum(nodemap, "LineSelector", "Out1", true);
           config.out1_mode = rcg::getEnum(nodemap, "LineSource", true);
-          rcg::setEnum(nodemap, "LineSelector", "Out2", true);
+          rcg::setEnum(nodemap, "LineSelector", "Out2", false);
           config.out2_mode = rcg::getEnum(nodemap, "LineSource", true);
 
           config.ptp_enabled = rcg::getBoolean(nodemap, "GevIEEE1588", false);
@@ -1157,7 +1158,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
 
               if (gev_packet_size == 0)
               {
-                gev_packet_size = rcg::getInteger(nodemap, "GevSCPSPacketSize", 0, 0, true, false);
+                gev_packet_size = rcg::getInteger(nodemap, "GevSCPSPacketSize", 0, 0, false, false);
               }
 
               // attach buffer to nodemap to access chunk data
