@@ -2,6 +2,11 @@
 Changelog for package rc_genicam_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.5.2 (2021-05-26)
+------------------
+
+* Relaxed some non-critical parameters to be optional
+
 0.5.1 (2021-02-11)
 ------------------
 
