@@ -90,7 +90,8 @@ template <class T> inline rc_common_msgs::KeyValue getKeyValue(const char *key, 
 
 void CameraParamPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat)
 {
-  if (nodemap && pub.getNumSubscribers() > 0 && (pixelformat == Mono8 || pixelformat == YCbCr411_8))
+  if (nodemap && pub.getNumSubscribers() > 0 && (pixelformat == Mono8 ||
+    pixelformat == YCbCr411_8 || pixelformat == RGB8))
   {
     uint64_t time = buffer->getTimestampNS();
 

@@ -124,7 +124,8 @@ void CameraInfoPublisher::requiresComponents(int& components, bool& color)
 
 void CameraInfoPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat)
 {
-  if (nodemap && pub.getNumSubscribers() > 0 && (pixelformat == Mono8 || pixelformat == YCbCr411_8))
+  if (nodemap && pub.getNumSubscribers() > 0 && (pixelformat == Mono8 ||
+    pixelformat == YCbCr411_8 || pixelformat == RGB8))
   {
     uint64_t time = buffer->getTimestampNS();
 

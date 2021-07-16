@@ -740,16 +740,16 @@ void GenICamDeviceNodelet::updateSubscriptions(bool force)
 
   if (rcolor != scolor || force)
   {
-    const char* format = "Mono8";
+    std::string format = "Mono8";
     if (rcolor)
     {
-      format = "YCbCr411_8";
+      format = color_format;
     }
 
     rcg::setEnum(nodemap, "ComponentSelector", "Intensity", true);
-    rcg::setEnum(nodemap, "PixelFormat", format, false);
+    rcg::setEnum(nodemap, "PixelFormat", format.c_str(), false);
     rcg::setEnum(nodemap, "ComponentSelector", "IntensityCombined", true);
-    rcg::setEnum(nodemap, "PixelFormat", format, false);
+    rcg::setEnum(nodemap, "PixelFormat", format.c_str(), false);
   }
 
   // store current settings
@@ -1043,6 +1043,14 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
           {
             if (format == "YCbCr411_8")
             {
+              color_format = "YCbCr411_8";
+              color = true;
+              break;
+            }
+
+            if (format == "RGB8")
+            {
+              color_format = "RGB8";
               color = true;
               break;
             }

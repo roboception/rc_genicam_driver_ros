@@ -87,6 +87,7 @@ private:
   std::shared_ptr<rcg::Device> dev;
   std::shared_ptr<GenApi::CNodeMapRef> nodemap;
 
+  std::string color_format;
   int scomponents;
   bool scolor;
 
