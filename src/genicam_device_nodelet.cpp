@@ -178,7 +178,7 @@ bool GenICamDeviceNodelet::depthAcquisitionTrigger(rc_common_msgs::Trigger::Requ
       {
         res.return_code.value = rc_common_msgs::ReturnCodeConstants::INTERNAL_ERROR;
         res.return_code.message = ex.what();
-        NODELET_ERROR(ex.what());
+        NODELET_ERROR_STREAM(ex.what());
       }
     }
     else
@@ -678,7 +678,7 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
   }
   catch (const std::exception& ex)
   {
-    NODELET_ERROR(ex.what());
+    NODELET_ERROR_STREAM(ex.what());
   }
 
   config = c;
@@ -1260,7 +1260,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
       {
         // report error, wait and retry
 
-        NODELET_WARN(ex.what());
+        NODELET_WARN_STREAM(ex.what());
 
         current_reconnect_trial++;
         streaming = false;
@@ -1292,7 +1292,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
         current_reconnect_trial++;
         pub.clear();
 
-        NODELET_ERROR(ex.what());
+        NODELET_ERROR_STREAM(ex.what());
 
         updater.force_update();
 
@@ -1314,7 +1314,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
   }
   catch (const std::exception& ex)
   {
-    NODELET_FATAL(ex.what());
+    NODELET_FATAL_STREAM(ex.what());
   }
   catch (...)
   {
