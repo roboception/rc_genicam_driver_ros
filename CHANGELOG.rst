@@ -2,6 +2,11 @@
 Changelog for package rc_genicam_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.6.1 (2021-08-02)
+------------------
+
+* Using parameter PtpEnable instead of deprecated parameter GevIEEE1588
+
 0.6.0 (2021-08-02)
 ------------------
 
