@@ -276,7 +276,7 @@ void GenICamDeviceNodelet::initConfiguration()
   config.depth_maxdepth = rcg::getFloat(nodemap, "DepthMaxDepth", 0, 0, true);
   config.depth_maxdeptherr = rcg::getFloat(nodemap, "DepthMaxDepthErr", 0, 0, true);
 
-  config.ptp_enabled = rcg::getBoolean(nodemap, "GevIEEE1588", false);
+  config.ptp_enabled = rcg::getBoolean(nodemap, "PtpEnable", true);
 
   rcg::setEnum(nodemap, "LineSelector", "Out1", true);
   config.out1_mode = rcg::getEnum(nodemap, "LineSource", true);
@@ -633,7 +633,7 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
 
       if ((level & 33554432) && c.ptp_enabled != config.ptp_enabled)
       {
-        if (!rcg::setBoolean(nodemap, "GevIEEE1588", c.ptp_enabled, false))
+        if (!rcg::setBoolean(nodemap, "PtpEnable", c.ptp_enabled, true))
         {
           NODELET_ERROR("Cannot change PTP.");
           c.ptp_enabled = false;
@@ -1012,7 +1012,7 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
           rcg::setEnum(nodemap, "LineSelector", "Out2", false);
           config.out2_mode = rcg::getEnum(nodemap, "LineSource", true);
 
-          config.ptp_enabled = rcg::getBoolean(nodemap, "GevIEEE1588", false);
+          config.ptp_enabled = rcg::getBoolean(nodemap, "PtpEnable", true);
 
           // assign callback each time to trigger resetting all values
 
