@@ -2,6 +2,11 @@
 Changelog for package rc_genicam_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.6.2 (2021-10-21)
+------------------
+
+* Controlling PtpEnable as optional so that this driver also works for rc_cube
+
 0.6.1 (2021-08-02)
 ------------------
 
