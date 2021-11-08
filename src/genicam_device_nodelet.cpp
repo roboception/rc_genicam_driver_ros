@@ -284,6 +284,15 @@ void GenICamDeviceNodelet::initConfiguration()
   rcg::setEnum(nodemap, "LineSelector", "Out2", false);
   config.out2_mode = rcg::getEnum(nodemap, "LineSource", true);
 
+  try
+  {
+    config.depth_exposure_adapt_timeout = rcg::getFloat(nodemap, "DepthExposureAdaptTimeout", 0, 0, true);
+  }
+  catch (const std::exception&)
+  {
+    NODELET_WARN("rc_visard_driver: rc_visard has an older firmware, depth_exposure_adapt_timeout is not available.");
+  }
+
   // try to get ROS parameters: if parameter is not set in parameter server
   // default to current sensor configuration
 
@@ -313,6 +322,7 @@ void GenICamDeviceNodelet::initConfiguration()
   pnh.param("depth_mindepth", config.depth_mindepth, config.depth_mindepth);
   pnh.param("depth_maxdepth", config.depth_maxdepth, config.depth_maxdepth);
   pnh.param("depth_maxdeptherr", config.depth_maxdeptherr, config.depth_maxdeptherr);
+  pnh.param("depth_exposure_adapt_timeout", config.depth_exposure_adapt_timeout, config.depth_exposure_adapt_timeout);
   pnh.param("ptp_enabled", config.ptp_enabled, config.ptp_enabled);
   pnh.param("out1_mode", config.out1_mode, config.out1_mode);
   pnh.param("out2_mode", config.out2_mode, config.out2_mode);
@@ -345,6 +355,7 @@ void GenICamDeviceNodelet::initConfiguration()
   pnh.setParam("depth_mindepth", config.depth_mindepth);
   pnh.setParam("depth_maxdepth", config.depth_maxdepth);
   pnh.setParam("depth_maxdeptherr", config.depth_maxdeptherr);
+  pnh.setParam("depth_exposure_adapt_timeout", config.depth_exposure_adapt_timeout);
   pnh.setParam("ptp_enabled", config.ptp_enabled);
   pnh.setParam("out1_mode", config.out1_mode);
   pnh.setParam("out2_mode", config.out2_mode);
@@ -672,6 +683,18 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
             c.out2_mode = "Low";
             NODELET_ERROR("Cannot change out2 mode. Sensor may have no 'iocontrol' license!");
           }
+        }
+      }
+      if (level & 268435456)
+      {
+        try
+        {
+          rcg::setFloat(nodemap, "DepthExposureAdaptTimeout", c.depth_exposure_adapt_timeout, true);
+        }
+        catch (const std::exception&)
+        {
+          c.depth_exposure_adapt_timeout = 0.0;
+          NODELET_ERROR("Cannot set depth_exposure_adapt_timeout. Please update the sensor to version >= 21.10!");
         }
       }
     }
