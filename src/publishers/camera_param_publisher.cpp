@@ -173,7 +173,7 @@ void CameraParamPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uin
       // feature not available on device
     }
 
-    param.extra_data.push_back(getKeyValueString("model_name", rcg::getString(nodemap, "DeviceModelName")));
+    param.extra_data.push_back(getKeyValueString("model_name", rcg::getString(nodemap, "DeviceModelName", false)));
 
     pub.publish(param);
   }
