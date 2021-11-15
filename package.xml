@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rc_genicam_driver</name>
-  <version>0.6.2</version>
+  <version>0.6.3</version>
   <description>
     The rc_genicam_driver provides data from a Roboception rc_visard 3D sensor or rc_cube on several ROS topics.
   </description>
