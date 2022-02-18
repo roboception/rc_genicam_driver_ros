@@ -978,6 +978,19 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
           dev->open(access);
           nodemap = dev->getRemoteNodeMap();
 
+          // ensure that device version >= 20.04
+
+          device_version = rcg::getString(nodemap, "DeviceVersion");
+
+          std::vector<std::string> list;
+          split(list, device_version, '.');
+
+          if (list.size() < 3 || std::stoi(list[0]) < 20 || (std::stoi(list[0]) == 20 && std::stoi(list[1]) < 4))
+          {
+            running = false;
+            throw std::invalid_argument("Device version must be 20.04 or higher: " + device_version);
+          }
+
           // check if device is ready
 
           if (!rcg::getBoolean(nodemap, "RcSystemReady", true, true))
@@ -998,19 +1011,6 @@ void GenICamDeviceNodelet::grab(std::string id, rcg::Device::ACCESS access)
                           << dev->getDisplayName());
 
           updater.setHardwareID(device_serial);
-
-          // ensure that device version >= 20.04
-
-          device_version = rcg::getString(nodemap, "DeviceVersion");
-
-          std::vector<std::string> list;
-          split(list, device_version, '.');
-
-          if (list.size() < 3 || std::stoi(list[0]) < 20 || (std::stoi(list[0]) == 20 && std::stoi(list[1]) < 4))
-          {
-            running = false;
-            throw std::invalid_argument("Device version must be 20.04 or higher: " + device_version);
-          }
 
           // get model type of the device
 
