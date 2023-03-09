@@ -209,10 +209,21 @@ void GenICamDeviceNodelet::initConfiguration()
   config.camera_fps = rcg::getFloat(nodemap, "AcquisitionFrameRate", 0, 0, true);
 
   std::string v = rcg::getEnum(nodemap, "ExposureAuto", true);
-  config.camera_exp_auto = (v != "Off");
 
-  if (config.camera_exp_auto)
+  if (v == "Off")
   {
+    config.camera_exp_control = "Manual";
+    config.camera_exp_auto_mode = "Normal";
+  }
+  else if (v == "HDR")
+  {
+    config.camera_exp_control = "HDR";
+    config.camera_exp_auto_mode = "Normal";
+  }
+  else
+  {
+    config.camera_exp_control = "Auto";
+
     if (v == "Continuous")
     {
       config.camera_exp_auto_mode = "Normal";
@@ -244,6 +255,12 @@ void GenICamDeviceNodelet::initConfiguration()
 
   rcg::setEnum(nodemap, "GainSelector", "All", false);
   config.camera_gain_value = rcg::getFloat(nodemap, "Gain", 0, 0, true);
+
+  config.camera_gamma = rcg::getFloat(nodemap, "Gamma", 0, 0, false);
+  if (config.camera_gamma == 0)
+  {
+    config.camera_gamma=1.0;
+  }
 
   try
   {
@@ -297,13 +314,14 @@ void GenICamDeviceNodelet::initConfiguration()
   // default to current sensor configuration
 
   pnh.param("camera_fps", config.camera_fps, config.camera_fps);
-  pnh.param("camera_exp_auto", config.camera_exp_auto, config.camera_exp_auto);
+  pnh.param("camera_exp_control", config.camera_exp_control, config.camera_exp_control);
   pnh.param("camera_exp_auto_mode", config.camera_exp_auto_mode, config.camera_exp_auto_mode);
   pnh.param("camera_exp_max", config.camera_exp_max, config.camera_exp_max);
   pnh.param("camera_exp_auto_average_max", config.camera_exp_auto_average_max, config.camera_exp_auto_average_max);
   pnh.param("camera_exp_auto_average_min", config.camera_exp_auto_average_min, config.camera_exp_auto_average_min);
   pnh.param("camera_exp_value", config.camera_exp_value, config.camera_exp_value);
   pnh.param("camera_gain_value", config.camera_gain_value, config.camera_gain_value);
+  pnh.param("camera_gamma", config.camera_gamma, config.camera_gamma);
   pnh.param("camera_exp_offset_x", config.camera_exp_offset_x, config.camera_exp_offset_x);
   pnh.param("camera_exp_offset_y", config.camera_exp_offset_y, config.camera_exp_offset_y);
   pnh.param("camera_exp_width", config.camera_exp_width, config.camera_exp_width);
@@ -330,13 +348,14 @@ void GenICamDeviceNodelet::initConfiguration()
   // set parameters on parameter server so that dynamic reconfigure picks them up
 
   pnh.setParam("camera_fps", config.camera_fps);
-  pnh.setParam("camera_exp_auto", config.camera_exp_auto);
+  pnh.setParam("camera_exp_control", config.camera_exp_control);
   pnh.setParam("camera_exp_auto_mode", config.camera_exp_auto_mode);
   pnh.setParam("camera_exp_max", config.camera_exp_max);
   pnh.setParam("camera_exp_auto_average_max", config.camera_exp_auto_average_max);
   pnh.setParam("camera_exp_auto_average_min", config.camera_exp_auto_average_min);
   pnh.setParam("camera_exp_value", config.camera_exp_value);
   pnh.setParam("camera_gain_value", config.camera_gain_value);
+  pnh.setParam("camera_gamma", config.camera_gamma);
   pnh.setParam("camera_exp_offset_x", config.camera_exp_offset_x);
   pnh.setParam("camera_exp_offset_y", config.camera_exp_offset_y);
   pnh.setParam("camera_exp_width", config.camera_exp_width);
@@ -376,7 +395,20 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
 
       if (level & 2)
       {
-        if (c.camera_exp_auto)
+        if (c.camera_exp_control == "HDR")
+        {
+          try
+          {
+            rcg::setEnum(nodemap, "ExposureAuto", "HDR", true);
+          }
+          catch (const std::exception &)
+          {
+            NODELET_WARN_STREAM("Sensor does not support HDR. Please update firmware.");
+            c.camera_exp_control = "Auto";
+          }
+        }
+
+        if (c.camera_exp_control == "Auto")
         {
           // Normal means continuous and off must be controlled with exp_auto
 
@@ -412,8 +444,10 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
 
           c.camera_exp_auto_mode = mode;
         }
-        else
+        else if (c.camera_exp_control != "HDR")
         {
+          c.camera_exp_control = "Manual";
+
           rcg::setEnum(nodemap, "ExposureAuto", "Off", true);
 
           usleep(100 * 1000);
@@ -456,6 +490,22 @@ void GenICamDeviceNodelet::reconfigure(rc_genicam_driver::rc_genicam_driverConfi
       if (level & 64)
       {
         rcg::setFloat(nodemap, "Gain", c.camera_gain_value, true);
+      }
+
+      if (level & 536870912)
+      {
+        try
+        {
+          rcg::setFloat(nodemap, "Gamma", c.camera_gamma, true);
+        }
+        catch (const std::exception &)
+        {
+          if (c.camera_gamma != 1.0)
+          {
+            NODELET_WARN_STREAM("Sensor does not support gamma. Please update firmware.");
+            c.camera_gamma = 1.0;
+          }
+        }
       }
 
       if (level & 128)
