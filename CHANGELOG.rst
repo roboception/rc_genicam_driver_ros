@@ -2,6 +2,13 @@
 Changelog for package rc_genicam_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.7.0 (2023-03-09)
+------------------
+
+* Increased max limits of some parameters so that it works for rc_viscore as well as rc_visard
+* Replaced parameter camera_exp_auto by camera_exp_control and added camera_gamma
+* check device version before ready
+
 0.6.3 (2021-11-15)
 ------------------
 
