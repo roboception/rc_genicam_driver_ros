@@ -14,9 +14,9 @@ endif ()
 add_definitions(-Wno-unknown-pragmas)
 add_definitions(-Wall)
 if (${CMAKE_VERSION} VERSION_LESS "3.1.0")
-  add_definitions(-std=c++11)
+  add_definitions(-std=c++17)
 else ()
-  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD 17)
 endif ()
 # add a target to generate API documentation with Doxygen
 
@@ -102,6 +102,6 @@ install(FILES
 ## Define information for packaging ##
 ######################################
 # optionally specify dependencies of the debian package here (comma separated!)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "rc-genicam-api (>= 2.3.0) | ros-$ENV{ROS_DISTRO}-rc-genicam-api (>= 2.3.0), ros-$ENV{ROS_DISTRO}-image-pipeline")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "rc-genicam-api (>= 2.3.0) | ros-$ENV{ROS_DISTRO}-rc-genicam-api (>= 2.3.0)")
 
 include(cmake/package_debian.cmake)

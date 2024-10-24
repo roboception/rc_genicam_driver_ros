@@ -83,9 +83,8 @@ Parameters to be set to the ROS param server before run-time.
 
   * serial number, e.g. `02912345`
 
-    IMPORTANT: preceed with a colon (`:02912345`) when passing this on the commandline or
-    setting it via rosparam (see https://github.com/ros/ros_comm/issues/1339).
-    This is not neccessary when specifying it as a string in a launch file.
+    IMPORTANT: preceed with a colon (`:02912345`) when passing this on the commandline,
+    setting it via rosparam or in the launch file (see https://github.com/ros/ros_comm/issues/1339).
 
   * user defined name (factory default is the name of the rc_visard's model), must be unique among all
     reachable sensors
@@ -321,6 +320,9 @@ It publishes 4 different messages:
 
 Launching
 ---------
+
+IMPORTANT: Prepending numerical serial numbers with ':' is important. Otherwise,
+the parameter will be ignored (see https://github.com/ros/ros_comm/issues/1339).
 
 * Using command line parameters:
   ```bash
